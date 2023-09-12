@@ -14,6 +14,7 @@
 #include "led.h"
 #include "keyndisp.h"
 #include "flags.h"
+#include "run.h"
 
 /* Private functions ---------------------------------------------------------*/
 int main(void)
@@ -25,6 +26,7 @@ int main(void)
 	OPS_Init();
 	Motor_Init();
 	OLED_Init();
+	PID_Init();
 	
 //	MPU_USART_Config();
 //	OPENMV_USART_Config();
@@ -44,10 +46,16 @@ int main(void)
 
 	while (1)
 	{
+		if(!flag_ops_ready){
+			OLED_ShowString(1, 1, "OPS prep.");
+			continue;
+		}
 		Input_Disp_Loop();
 		if (flag_start)
 		{
-			Set_Speed_All(50, 50, 50, 50);
+			speed_limit = 80;
+			Go_Position_Test(0.80, 0.80, 0);
+			//Run();
 		} else
 		{
 			Set_Speed_All(0, 0, 0, 0);

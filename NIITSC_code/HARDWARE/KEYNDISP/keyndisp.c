@@ -6,6 +6,7 @@
 #include "motor.h"
 #include "delay.h"
 #include "openmv.h"
+#include "control.h"
 
 static int min_page = -1, max_page = 3, min_var_page = 0, max_var_page = 3;
 int flag_varmod = 0;
@@ -272,6 +273,7 @@ void Input_Disp_Loop(void)
 				OLED_ShowString(4, 14, "p1");
 				break;
 			case 2:
+				Control_Display_Specs();
 				OLED_ShowString(4, 14, "p2");
 				break;
 			case 3:

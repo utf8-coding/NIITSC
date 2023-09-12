@@ -22,9 +22,26 @@
 #define GPIO_AF_QRCODE_UART                       GPIO_AF_UART4
 #define QRCODE_UART_IRQn                          UART4_IRQn
 
+#define QR_BUFF_SIZE                     		8
 
+
+typedef enum {
+	qrWrong,
+	qrRight
+}qrRecState;
+
+enum qrColor{
+	red = 0x31,
+	green,
+	blue,
+	plus = 0x2B,
+	qrEnd = 0x0D
+};
 
 void QRCODE_UART_Config(void);
+qrRecState QR_Ready(void);
 
+extern u8 qr_buff[QR_BUFF_SIZE];
+extern qrRecState qr_state;
 
 #endif

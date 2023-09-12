@@ -17,7 +17,8 @@ target_cy = int(IMG_H/2)
 red_target_th = (10, 100, 15, 61, -22, 127)
 green_target_th = (30, 100, -51, -7, -3, 30)
 blue_target_th = (8, 80, -86, 22, -87, -9)
-area_th = 3500
+far_area_th = 3500
+area_th = far_area_th
 
 red_led   = LED(1)
 green_led = LED(2)
@@ -76,17 +77,21 @@ if __name__ == '__main__':
 
         img = sensor.snapshot()
 
+        blobs = []
+
         # 模式处理：指令（0x01 红 0x02绿 0x03蓝）
         if uart.any():
             cmd_byte_array = uart.read()
             if cmd_byte_array[-1] == 0x00:
                 flag_mode = 0
-            elif cmd_byte_array[-1] == 0x01:
+            elif cmd_byte_array[-1]&0x01:
                 flag_mode = 1
-            elif cmd_byte_array[-1] == 0x02:
+            elif cmd_byte_array[-1]&0x02:
                 flag_mode = 2
-            elif cmd_byte_array[-1] == 0x03:
+            elif cmd_byte_array[-1]&0x03:
                 flag_mode = 3
+            elif cmd_byte_array[-1]&0x04:
+                flag_mode = 4
             else:
                 flag_mode = 0
 
@@ -99,20 +104,46 @@ if __name__ == '__main__':
             red_led.on()
             green_led.off()
             blue_led.off()
-            mark0 = mark0|0x10
+            mark0 = mark0|0x01
             blobs = img.find_blobs([red_target_th], merge = False, area_threshold = area_th)
         elif flag_mode == 2:
             red_led.off()
             green_led.on()
             blue_led.off()
-            mark0 = mark0|0x20
+            mark0 = mark0|0x02
             blobs = img.find_blobs([green_target_th], merge = False, area_threshold = area_th)
         elif flag_mode == 3:
             red_led.off()
             green_led.off()
             blue_led.on()
-            mark0 = mark0|0x40
             blobs = img.find_blobs([blue_target_th], merge = False, area_threshold = area_th)
+            mark0 = mark0|0x04
+         elif flag_mode == 4:
+            red_led.on()
+            green_led.on()
+            blue_led.on()
+
+            blobs_r = img.find_blobs([red_target_th], merge = False, area_threshold = area_th)
+            blobs_g = img.find_blobs([green_target_th], merge = False, area_threshold = area_th)
+            blobs_b = img.find_blobs([blue_target_th], merge = False, area_threshold = area_th)
+            if blobs_r:
+                r_blob = max(blobs_r, key = lambda x: x.area())
+            if blobs_g:
+                g_blob = max(blobs_g, key = lambda x: x.area())
+            if blobs_b:
+                b_blob = max(blobs_b, key = lambda x: x.area())
+            colors = [r_blob, g_blob, b_blob]
+            dist = (IMG_W/2)^2+(IMG_H/2)^2
+            for i in range(0, 3):
+                if (colors[i].cx - IMG_W/2)^2+(colors[i].cy - IMG_H/2)^2 < dist:
+                    dist = (colors[i].cx - IMG_W/2)^2+(colors[i].y - IMG_H/2)^2
+                    color = i+1
+            mark1 = mark1 | color
+
+
+
+            mark0 = mark0|0x08
+
         if blobs:
             target_blob = max(blobs, key = lambda x: x.area())
             cx = target_blob.cx()
@@ -121,7 +152,7 @@ if __name__ == '__main__':
         # 图像调试内容：
         print(cx, cy)
         blobs_r = []; blobs_g = []; blobs_b = []
-        if flag_mode == 4:
+        if flag_mode == 5:
             blobs_r = img.find_blobs([red_target_th], merge = True, area_threshold = area_th)
             blobs_g = img.find_blobs([green_target_th], merge = True, area_threshold = area_th)
             blobs_b = img.find_blobs([blue_target_th], merge = True, area_threshold = area_th)

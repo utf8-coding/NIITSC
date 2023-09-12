@@ -73,6 +73,8 @@ void USART2_IRQHandler()
 				flag_openmv_mode = 2;
 			else if (0x04&OMV_data[2])
 				flag_openmv_mode = 3;
+			else if (0x08&OMV_data[2])
+				flag_openmv_mode = 4;
 			
 			//Target cx, cy data:
 			//possible bug here, MSB/LSB in advance?
@@ -94,7 +96,7 @@ void OpenMV_Display_Specs(void)
 	OLED_ShowSignedNum(2, 8, target_cy, 4);
 }
 
-//Idle:0, Red:1, G:2, B:3
+//Idle:0, Red:1, G:2, B:3, recog:4
 int OpenMV_Change_Mode(u8 mode)
 {
 	OLED_Clear();

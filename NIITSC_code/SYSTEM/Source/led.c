@@ -36,7 +36,7 @@ void LED_Init(void)
 
 void LED_Flip(void)
 {
-	if(LED_State>150)
+	if(LED_State>20)
 	{
 		LED_State++;
 		LED1_OFF;
@@ -45,7 +45,7 @@ void LED_Flip(void)
 		LED_State++;
 		LED1_ON;
 	}
-	if(LED_State>=300)
+	if(LED_State>=40)
 		LED_State = 0;
 }
 

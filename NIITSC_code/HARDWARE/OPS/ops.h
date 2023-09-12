@@ -3,8 +3,6 @@
 
 #include "stm32f4xx.h"
 
-
-
 /*----------------------OPS_UARTÅäÖÃºê ------------------------*/
 #define OPS_UART                           	UART5
 #define OPS_UART_BaudRate  					115200
@@ -23,7 +21,14 @@
 #define GPIO_AF_OPS_UART                       GPIO_AF_UART5
 #define OPS_UART_IRQn                          UART5_IRQn
 
+typedef union{
+	u8 data[32];
+	float ActVal[8];
+	
+}OPS;
+
 extern float OPS_x, OPS_y, OPS_heading;
+extern int32_t OPS_ring;
 
 void OPS_Init(void);
 void OPS_Display_Specs(void);

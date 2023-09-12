@@ -3,14 +3,14 @@
 
 #include "sys.h" 
 
-#define AIN1   PDout(4)  
-#define AIN2   PDout(5)  
-#define BIN1   PDout(1)  
-#define BIN2   PDout(0)  
-#define CIN1   PAout(12) 
-#define CIN2   PAout(11) 
-#define DIN1   PGout(7)  
-#define DIN2   PGout(8)  
+#define AIN1   PDout(5)  
+#define AIN2   PDout(4)  
+#define BIN1   PDout(0)  
+#define BIN2   PDout(1)  
+#define CIN1   PAout(11) 
+#define CIN2   PAout(12) 
+#define DIN1   PGout(8)  
+#define DIN2   PGout(7)  
 #define PWMA   TIM3->CCR2
 #define PWMB   TIM4->CCR3
 #define PWMC   TIM3->CCR3
