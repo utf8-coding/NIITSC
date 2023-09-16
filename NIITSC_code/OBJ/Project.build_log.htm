@@ -28,8 +28,6 @@ Project File Date:  09/12/2023
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Tools\Keil_MDK\core\ARM\ARM_Compiler_5.06u7\Bin'
 Build target 'Project'
 compiling run.c...
-run.c(109): warning:  #111-D: statement is unreachable
-  			break;
 run.c(166): warning:  #188-D: enumerated type mixed with another type
   		servo_Action(getObj, 1); //这个函数会不会阻塞？不阻塞则也需要延时
 run.c(232): warning:  #188-D: enumerated type mixed with another type
@@ -60,10 +58,10 @@ run.c(689): warning:  #188-D: enumerated type mixed with another type
   				servo_Action(putRough, 1);
 run.c(721): warning:  #177-D: variable "ops_calib_ok"  was declared but never referenced
   	static u8 ops_calib_ok = 0;
-run.c: 16 warnings, 0 errors
+run.c: 15 warnings, 0 errors
 linking...
-Program Size: Code=18952 RO-data=2232 RW-data=228 ZI-data=1540  
-"..\OBJ\Project.axf" - 0 Error(s), 16 Warning(s).
+Program Size: Code=19092 RO-data=2236 RW-data=236 ZI-data=1540  
+"..\OBJ\Project.axf" - 0 Error(s), 15 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -76,7 +74,7 @@ Package Vendor: Keil
   D:/Tools/Keil_MDK/packs/Keil/STM32F4xx_DFP/2.17.1/Drivers/CMSIS/Device/ST/STM32F4xx/Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:03
+Build Time Elapsed:  00:00:04
 </pre>
 </body>
 </html>

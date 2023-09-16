@@ -10,7 +10,7 @@
 
 
 u8 color_Index = 0; // 车上的数量  
-const float slow_move_speed = 0.1;
+const float slow_move_speed = 0.18;
 
 void qr_Run_Main(void);
 void obj_Run_Main(void);
@@ -58,15 +58,16 @@ void Run(void){
 u8 qr_Run_State = 1;
 void qr_Run1(void)
 {
-	Set_Control_Mode(velocityMode);
-	Set_Speed(-0.2, 0.2, 0); //比QR位置靠前一点的坐标，先快速到位
+	Set_Control_Mode(coordinateMode);
+	Set_Target_Coordinate(-0.18, 0.6); //比QR位置靠前一点的坐标，先快速到位
+	speed_limit = 50;
 	qr_Run_State = 2;
 }
 
 void qr_Run2(void)
 {
 	//等待到位
-	if(OPS_x <= -0.15)
+	if(flag_arrive)
 	{
 		//到位慢慢往前
 		Set_Control_Mode(velocityMode);
@@ -83,7 +84,6 @@ void qr_Run3(void)
 	else if (QR_Ready() == qrRight)
 	{
 		//扫好了，右转90
-		Set_Control_Mode(stop);
 		Turn_Right90();
 		qr_Run_State = 4; //进下一阶段
 	}
@@ -106,7 +106,6 @@ void qr_Run_Main(void){
 		case 3:
 			qr_Run3();
 			break;
-			break;
 		case 4:
 			run_Mode = objMode;
 			break;
@@ -118,14 +117,15 @@ u8 obj_Run_State = 1;
 void obj_Run1(void)
 {
 	//快走到圆盘前面一点点
-	Set_Control_Mode(velocityMode);
-	Set_Speed(-0.18, 0, 0);
+	Set_Control_Mode(coordinateMode);
+	Set_Target_Coordinate(-0.18, 1.0);
+	speed_limit = 50;
 	obj_Run_State++;
 }
 
 void obj_Run2(void)
 {
-	if(OPS_y >= 1.0f)
+	if(flag_arrive&&flag_stable)
 	{
 		//向左走，走到红外标定的位置，速度待定：
 		Set_Control_Mode(velocityMode);
@@ -137,8 +137,9 @@ void obj_Run2(void)
 void obj_Run3(void)
 {
 	//等待红外检测到，假设是一号 C0，由暗色到亮色是变成0
-	if(~Infrared_Scan() & 0x01)
+	if(Infrared_Scan() & 0x01)
 	{
+		flag_start = 0;
 		//向前走，去对齐另一个激光的边缘
 		Set_Speed(0, slow_move_speed, 0);
 		obj_Run_State++;
@@ -148,7 +149,7 @@ void obj_Run3(void)
 void obj_Run4(void)
 {
 	//假设是二号 C1
-	if(~Infrared_Scan() & 0x02){
+	if(Infrared_Scan() & 0x02){
 		Set_Control_Mode(stop); //停下来
 
 		if(!OpenMV_Change_Mode(4))

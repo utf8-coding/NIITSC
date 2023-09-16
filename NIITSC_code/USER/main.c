@@ -35,6 +35,7 @@ int main(void)
 //	SCREEN_USART_Config();
 	
 //	Laser_Init();
+
 	
 	while (1)
 	{

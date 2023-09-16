@@ -16,13 +16,14 @@
 u8 speed_limit = 80, angular_speed_limit = 20;
 
 //Internal:
+int ideal_heading = 0, ideal_ring = 0;
 float target_x = 0, target_y = 0, target_heading = 0;
 ControlMode control_mode = coordinateMode;
 float vx = 0, vy = 0, w = 0;
 int motorA_speed = 0, motorB_speed = 0, motorC_speed = 0, motorD_speed = 0;
 const float PI = 3.14159265, H = 0.188, W = 0.25, Wheel_C = 0.035*2*PI, Speed_PWM_Ratio = 22*Wheel_C/800;
 const float xy_kp = 0.80, xy_ki = 0.05, xy_kd = 0, xy_ki_limit = 10*Speed_PWM_Ratio, 
-						z_kp = 0.03, z_ki = 0.00015, z_kd = 0.0, z_ki_limit = 5*Speed_PWM_Ratio, 
+						z_kp = 0.07, z_ki = 0.001, z_kd = 0.0, z_ki_limit = 3*Speed_PWM_Ratio, 
 						mv_kp = 0.008, mv_ki = 0.0005, mv_kd = 0, mv_ki_limit = 5*Speed_PWM_Ratio;
 const float openmv_correction_threshold = 5;
 PID x_pid, y_pid, heading_pid, openmv_x_PID, openmv_y_PID;
@@ -99,10 +100,10 @@ float pid_calculate(PID* pid, float input, float measure)
 void wheel_speed_calc(float vx, float vy, float vw) //m/s
 {
 	int temp[4];
-	temp[0] = (-vy - vx - vw * (H + W))/Speed_PWM_Ratio; 
-	temp[1] = (-vy + vx + vw * (H + W))/Speed_PWM_Ratio;
-	temp[2] = (-vy + vx - vw * (H + W))/Speed_PWM_Ratio; 
-	temp[3] = (-vy - vx + vw * (H + W))/Speed_PWM_Ratio;
+	temp[0] = (vy + vx + vw * (H + W))/Speed_PWM_Ratio; 
+	temp[1] = (vy - vx - vw * (H + W))/Speed_PWM_Ratio;
+	temp[2] = (vy - vx + vw * (H + W))/Speed_PWM_Ratio; 
+	temp[3] = (vy + vx - vw * (H + W))/Speed_PWM_Ratio;
 	
 	//Unify if too big:(problematic)
 	int max_speed = 0;
@@ -130,12 +131,14 @@ void wheel_speed_calc(float vx, float vy, float vw) //m/s
 
 void coordinate_Loop(void)
 {
-	pid_calculate(&x_pid, OPS_x, target_x);
-	pid_calculate(&y_pid, OPS_y, target_y);
-	pid_calculate(&heading_pid, OPS_heading+OPS_ring*360, target_heading);
-	vx = (y_pid.output)*sin(OPS_heading/PI)+(x_pid.output)*cos(OPS_heading/PI);
-	vy = (y_pid.output)*cos(OPS_heading/PI)-(x_pid.output)*sin(OPS_heading/PI);
+	pid_calculate(&x_pid, target_x, OPS_x);
+	pid_calculate(&y_pid, target_y, OPS_y);
+	pid_calculate(&heading_pid, target_heading, OPS_heading+OPS_ring*360);
+	
+	vx = -(y_pid.output)*sin(OPS_heading/PI)+(x_pid.output)*cos(OPS_heading/PI);
+	vy = (y_pid.output)*cos(OPS_heading/PI)+(x_pid.output)*sin(OPS_heading/PI);
 	w = heading_pid.output;
+	
 	wheel_speed_calc(vx,vy,w);
 	
 	Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
@@ -180,19 +183,41 @@ void Set_Target_Heading(float heading)
 
 void Turn_Right90(void)
 {
-	float target_heading = OPS_heading + OPS_ring*360 + 90;
-	wheel_speed_calc(0, 0, 0.2);
+	ideal_heading += 90;
+	float turn_heading = ideal_ring*360 + ideal_heading;
+	
+	wheel_speed_calc(0, 0, 0.5);
 	Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
-	while(OPS_heading + OPS_ring*360 <= target_heading - 2);
+	
+	while(OPS_heading + OPS_ring*360 <= turn_heading);
+	
+	if (ideal_heading >= 180)
+	{
+		ideal_heading -= 360;
+		ideal_ring += 1;
+	}
+	target_heading = ideal_heading;
+	
 	Set_Speed_All(0, 0, 0, 0);
 }
 
 void Turn_Left90(void)
 {
-	float target_heading = OPS_heading + OPS_ring*360 - 90;
-	wheel_speed_calc(0, 0, -0.2);
+	ideal_heading -= 90;
+	float turn_heading = ideal_ring*360 + ideal_heading;
+	
+	wheel_speed_calc(0, 0, -0.5);
 	Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
-	while(OPS_heading + OPS_ring*360 >= target_heading + 2);
+	
+	while(OPS_heading + OPS_ring*360 >= turn_heading);
+	
+	if (ideal_heading <= -180)
+	{
+		ideal_heading += 360;
+		ideal_ring -= 1;
+	}
+	target_heading = ideal_heading;
+	
 	Set_Speed_All(0, 0, 0, 0);
 }
 
@@ -208,11 +233,17 @@ void Wheel_Run_Loop(void)
 		Set_Speed_All(0, 0, 0, 0);
 		return;
 	}
-	
-	if(control_mode == coordinateMode)
+	else if(control_mode == coordinateMode)
+	{
 		coordinate_Loop();
-	wheel_speed_calc(vx, vy, w);
-	Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
+		wheel_speed_calc(vx, vy, w);
+		Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
+	}
+	else if(control_mode == velocityMode)
+	{
+		wheel_speed_calc(vx, vy, w);
+		Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
+	}
 }
 
 
@@ -247,4 +278,7 @@ void Control_Display_Specs(void)
 	OLED_ShowSignedNum(2, 1, (int)(vx*100), 4);
 	OLED_ShowSignedNum(2, 7, (int)(vy*100), 4);
 	OLED_ShowSignedNum(3, 1, (int)(w*100), 4);
+	
+	OLED_ShowSignedNum(4, 1, (int) x_pid.error * 1000, 3);
+	OLED_ShowSignedNum(4, 5, (int) y_pid.error * 1000, 3);
 }
