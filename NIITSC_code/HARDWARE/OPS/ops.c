@@ -3,6 +3,8 @@
 #include "oled.h"
 #include "led.h"
 #include "flags.h"
+#include "string.h"
+#include "delay.h"
 
 float OPS_x = 0, OPS_y = 0, OPS_heading = 0;
 int32_t OPS_ring = 0;
@@ -66,12 +68,24 @@ void UART5_IRQHandler()
 		//USART_TypeDef* UARTx, u8 *buffer, u8 buffer_size, u8 data_size, u8 *out_buffer, u16 header, u16 tail
 		if(Serial_Receive_Data_LH(UART5, OPS_Rx_Buffer, 30, 28, &OPS_data.data[2], 0x0d0a, 0x0a0d))
 		{
-			if (OPS_heading > 160 && OPS_data.ActVal[1] < -160)
+			static u8 ring_lock = 0;
+			if (OPS_heading > 170 && -OPS_data.ActVal[1] < -170 && !ring_lock)
+			{
 				OPS_ring += 1;
-			if (OPS_heading < -160 && OPS_data.ActVal[1] > 160)
+				ring_lock = 1;
+			}
+			else if (OPS_heading < -170 && -OPS_data.ActVal[1] > 170 && !ring_lock)
+			{
 				OPS_ring -= 1;
+				ring_lock = 1;
+			}
+			else if (OPS_heading >= -170 && OPS_heading <= 170)
+			{
+				ring_lock = 0;
+			}
+				
 			
-			OPS_heading = OPS_data.ActVal[1];//degree
+			OPS_heading = -OPS_data.ActVal[1];//degree
 			OPS_x = OPS_data.ActVal[4]/1000;
 			OPS_y = OPS_data.ActVal[5]/1000; //m
 		}
@@ -79,6 +93,33 @@ void UART5_IRQHandler()
 		if(OPS_heading+OPS_x+OPS_y != 0 && !flag_ops_ready)
 			flag_ops_ready = 1;
 	}
+}
+
+void OPS_Calibrate(float x, float y, float heading)
+{
+	u8 update_x[4] = "ACTX";
+	u8 update_y[4] = "ACTY";
+	u8 update_j[4] = "ACTJ";
+	
+	static union
+	{
+		float value;
+		u8 data[4];
+	}new_value;
+	
+	new_value.value = x;
+	Serial_SendArray(UART5, update_x, 4);
+	Serial_SendArray(UART5, new_value.data, 4);
+	
+	delay_ms(10);
+	new_value.value = y;
+	Serial_SendArray(UART5, update_y, 4);
+	Serial_SendArray(UART5, new_value.data, 4);
+	
+	delay_ms(10);
+	new_value.value = -heading;
+	Serial_SendArray(UART5, update_j, 4);
+	Serial_SendArray(UART5, new_value.data, 4);
 }
 
 void OPS_Display_Specs(void)

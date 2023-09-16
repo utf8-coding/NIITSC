@@ -31,6 +31,6 @@ void INFRARED1_Init(void);
 void INFRARED2_Init(void);
 void INFRARED3_Init(void);
 void INFRARED4_Init(void);
-u8	Infrared_Scan(GPIO_TypeDef* INFRARED_PORT, uint16_t INFRARED_PIN);
+u8	Infrared_Scan(void);
 #endif //__LED_H
 

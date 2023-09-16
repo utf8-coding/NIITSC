@@ -4,120 +4,302 @@
 #include "flags.h"
 #include "control.h"
 #include "servo.h"
+#include "ops.h"
+#include "infrared.h"
+#include "delay.h"
 
 
-u8 color_Index = 0; // ³µÉÏµÄÊýÁ¿
+u8 color_Index = 0; // ³µÉÏµÄÊýÁ¿  
+const float slow_move_speed = 0.1;
 
-void qr_Run(void);
-void obj_Run1(void);
-void rough_Run(void);
-void rough_Put(void);
-void rough_Get(void);
-/* 
-	0 qrcode
-	1 material
-*/
+void qr_Run_Main(void);
+void obj_Run_Main(void);
+void rough_Run_Main(void);
+void deposit_Run_Main(void);
+void backObj_Run_Main(void);
+void obj2_Run_Main(void);
+void deposit2_Run_Main(void);
+void home_Run_Main(void);
 
-runState run_Mode = qrcode;
-u8 mode_change_sign = 1;
+runState run_Mode = qrcodeMode;
 
 void Run(void){
 	Wheel_Run_Loop();
 	switch (run_Mode) {
-		case qrcode:
-			qr_Run();
+		case qrcodeMode:
+			qr_Run_Main();
 			break;
-		case objmode:
-			obj_Run1(); 
+		case objMode:
+			obj_Run_Main(); 
+			break;
+		case roughMode:
+			rough_Run_Main();
+			break;
+		case depositMode:
+			deposit_Run_Main();
+			break;
+		case backObjMode:
+			backObj_Run_Main();
+			break;
+		case objMode2:
+			obj2_Run_Main();
+			break;
+		case depositMode2:
+			deposit2_Run_Main();
+			break;
+		case homeMode:
+			home_Run_Main();
 			break;
 	}
 }
 
-void qr_Init()
+/*-----------------------------qr--------------------------*/
+
+u8 qr_Run_State = 1;
+void qr_Run1(void)
+{
+	Set_Control_Mode(velocityMode);
+	Set_Speed(-0.2, 0.2, 0); //±ÈQRÎ»ÖÃ¿¿Ç°Ò»µãµÄ×ø±ê£¬ÏÈ¿ìËÙµ½Î»
+	qr_Run_State = 2;
+}
+
+void qr_Run2(void)
+{
+	//µÈ´ýµ½Î»
+	if(OPS_x <= -0.15)
+	{
+		//µ½Î»ÂýÂýÍùÇ°
+		Set_Control_Mode(velocityMode);
+		Set_Speed(0, slow_move_speed, 0); //ÂýÂýÍùÇ°
+		qr_Run_State = 3;
+	}
+}
+
+void qr_Run3(void)
 {
 	
+	if(QR_Ready() == qrWrong)
+		Set_Control_Mode(stop); //´íÁËÍ£³µÔÙÉ¨
+	else if (QR_Ready() == qrRight)
+	{
+		//É¨ºÃÁË£¬ÓÒ×ª90
+		Set_Control_Mode(stop);
+		Turn_Right90();
+		qr_Run_State = 4; //½øÏÂÒ»½×¶Î
+	}
+	else if (QR_Ready() == scanning && OPS_y > 1.8f)
+	{
+		Set_Control_Mode(stop);
+		flag_start = 0; //×ßÌ«Ô¶ÁË£¬Ö±½ÓËøËÀ£¬µÈÊÖ¶¯ÖØÖÃ
+	}
 }
 
-void qr_Run(void){
-	//ops run
-	if(mode_change_sign)
+void qr_Run_Main(void){
+	switch(qr_Run_State)
 	{
-		flag_run = 1;
-		Set_Target_Coordinate(-0.1, 0.6, 0);
-		mode_change_sign = 0;
+		case 1:
+			qr_Run1();
+			break;
+		case 2:
+			qr_Run2();
+			break;
+		case 3:
+			qr_Run3();
+			break;
+			break;
+		case 4:
+			run_Mode = objMode;
+			break;
 	}
-	
-	if(flag_arrive)
+}
+/*-----------------------------obj--------------------------*/
+
+u8 obj_Run_State = 1;
+void obj_Run1(void)
+{
+	//¿ì×ßµ½Ô²ÅÌÇ°ÃæÒ»µãµã
+	Set_Control_Mode(velocityMode);
+	Set_Speed(-0.18, 0, 0);
+	obj_Run_State++;
+}
+
+void obj_Run2(void)
+{
+	if(OPS_y >= 1.0f)
 	{
-		Set_Target_Coordinate(-0.1, 0.7, 0);
-		speed_limit = 30;
-		while(!QR_Ready()){
-			if(flag_stable) //End of the scanning, if failed, should stop.
-				break;
-		}
-		
-		//ÏÂÒ»ÂÖ³õÊ¼»¯£º
+		//Ïò×ó×ß£¬×ßµ½ºìÍâ±ê¶¨µÄÎ»ÖÃ£¬ËÙ¶È´ý¶¨£º
+		Set_Control_Mode(velocityMode);
+		Set_Speed(-slow_move_speed, 0, 0);
+		obj_Run_State++;
+	}
+}
+
+void obj_Run3(void)
+{
+	//µÈ´ýºìÍâ¼ì²âµ½£¬¼ÙÉèÊÇÒ»ºÅ C0£¬ÓÉ°µÉ«µ½ÁÁÉ«ÊÇ±ä³É0
+	if(~Infrared_Scan() & 0x01)
+	{
+		//ÏòÇ°×ß£¬È¥¶ÔÆëÁíÒ»¸ö¼¤¹âµÄ±ßÔµ
+		Set_Speed(0, slow_move_speed, 0);
+		obj_Run_State++;
+	}	
+}
+
+void obj_Run4(void)
+{
+	//¼ÙÉèÊÇ¶þºÅ C1
+	if(~Infrared_Scan() & 0x02){
+		Set_Control_Mode(stop); //Í£ÏÂÀ´
+
 		if(!OpenMV_Change_Mode(4))
-		{
-			flag_start = 0;
-		}
-		flag_run = 1;
-		Set_Target_Coordinate(-0.1, 0.8, 0);
-		mode_change_sign = 0;
-		run_Mode = objmode;
+			flag_start = 0; //MV³õÊ¼»¯Ê§°Ü£¬µÈ´ýÊÖ¹¤ÖØÖÃ
+		
+		obj_Run_State++;
 	}
 }
 
-void obj_Run1(void){
-	//ops run
-	static u8 position_ok = 0;
-	if(flag_arrive && !position_ok)
-	{
-		flag_run = 0;
-		position_ok = 1;
-	}
-	
-	//Í£³µ	
-	if(position_ok && (qr_buff[color_Index]&0x01) == (mark1 & 0x0f)){
-		//×¥
-		servo_Action(getObj, 1);
+
+void obj_Run5(void)
+{
+	if((qr_buff[color_Index]&0x0f) == (mark1&0x0f)){
+		//×¥£¬Òª×öÑÓÊ±¿ØÖÆÊ±»ú£¬MV¼ì²âµ½Ê±É«¿é»¹²»Ò»¶¨ÎÈ¶¨ÏÂÀ´
+		servo_Action(getObj, 1); //Õâ¸öº¯Êý»á²»»á×èÈû£¿²»×èÈûÔòÒ²ÐèÒªÑÓÊ±
+		delay_ms(10000);          //
 		if(color_Index == 3){
-			run_Mode = roughmode;
+			obj_Run_State++;
 		}
 	}
 }
+
+void obj_Run_Main(void)
+{
+	switch(obj_Run_State)
+	{
+		case 1:
+			obj_Run1();
+			break;
+		case 2:
+			obj_Run2();
+			break;
+		case 3:
+			obj_Run3();
+			break;
+		case 4:
+			obj_Run4();
+			break;
+		case 5:
+			run_Mode = roughMode;
+			break;
+	}
+}
+
+/*-----------------------------rough--------------------------*/
+
+
+u8 rough_Run_State = 1;
 //´Ö¼Ó¹¤Çø·ÅÖÃ
 void rough_Put(void){
-	switch(qr_buff[3 - color_Index]){
+	static u8 buff_Index = 0;
+	if( color_Index < 4 ){
+		buff_Index = 3 - color_Index;
+	}
+	else if( color_Index > 4 && color_Index <= 7 ){
+		buff_Index = 11 - color_Index;
+	}
+
+	u8 flag_running = 0, flag_on_location = 0;
+	switch(qr_buff[buff_Index]){        //0->123 or 4->567
 		case red:
-			//ops
-			if((mark1 & 0x0f) == red){
-				//if openmv ÕÒµ½ÖÐÐÄ
-				//Í£³µ
-				servo_Action(putRough, 1);
+			if(!flag_running)
+			{
+				Set_Control_Mode(coordinateMode);
+				Set_Target_Coordinate(-0.5, 1.5);//´ý¶¨
+				flag_running = 1;
+			}
+			if (flag_running && flag_on_location )
+			{
+				if(flag_arrive  && flag_stable)
+				{
+					flag_on_location = 1;
+				}
+			}
+			
+			if(flag_on_location){
+				if(Openmv_Correction_Ready())
+				{
+					Set_Control_Mode(stop);
+					//Í£³µ
+					servo_Action(putRough, 1);
+					delay_ms(10000);
+					flag_running = 0; flag_on_location = 0;
+				}
 			}
 			break;
 		case green:
-			//ops
-			if((mark1 & 0x0f) == green){
-				//if openmv ÕÒµ½ÖÐÐÄ
-				//Í£³µ
-				servo_Action(putRough, 1);
+			if(!flag_running)
+			{
+				Set_Control_Mode(coordinateMode);
+				Set_Target_Coordinate(-0.65, 1.5);//´ý¶¨ ÂÌÉ«Î»ÖÃ
+				flag_running = 1;
+			}
+			if (flag_running && flag_on_location )
+			{
+				if(flag_arrive  && flag_stable)
+				{
+					flag_on_location = 1;
+				}
+			}
+			
+			if(flag_on_location){
+				if(Openmv_Correction_Ready())
+				{
+					Set_Control_Mode(stop);
+					//Í£³µ
+					servo_Action(putRough, 1);
+					delay_ms(10000);
+					flag_running = 0; flag_on_location = 0;
+				}
 			}
 			break;
 		case blue:
-			//ops
-			if((mark1 & 0x0f) == blue){
-				//if openmv ÕÒµ½ÖÐÐÄ
-				//Í£³µ
-				servo_Action(putRough, 1);
+			if(!flag_running)
+			{
+				Set_Control_Mode(coordinateMode);
+				Set_Target_Coordinate(-0.80, 1.5);//´ý¶¨ À¶É«Î»ÖÃ
+				flag_running = 1;
+			}
+			if (flag_running && flag_on_location )
+			{
+				if(flag_arrive  && flag_stable)
+				{
+					flag_on_location = 1;
+				}
+			}
+			
+			if(flag_on_location){
+				if(Openmv_Correction_Ready())
+				{
+					Set_Control_Mode(stop);
+					//Í£³µ
+					servo_Action(putRough, 1);
+					delay_ms(10000);
+					flag_running = 0; flag_on_location = 0;
+				}
 			}
 			break;
 	}
 }
 
 void rough_Get(void){
-	switch(qr_buff[color_Index]){
+	static u8 buff_Index = 0;
+	if( color_Index < 4 ){
+		buff_Index = 3 - color_Index;
+	}
+	else if( color_Index > 4 && color_Index <= 7 ){
+		buff_Index = 11 - color_Index;
+	}
+	
+	switch(qr_buff[buff_Index]){
 		case red:
 			//ops
 			if((mark1 & 0x0f) == red){
@@ -144,46 +326,439 @@ void rough_Get(void){
 			break;
 	}
 }
-//µ½´Ö¼Ó¹¤Çø£
-void rough_Run(void){
-	static u8 position_ok = 0;
-	static u8 ops_calib_ok = 0;
-	if(!position_ok && !ops_calib_ok ){
-		//Âý×ß£¨Ö±µ½¼¤¹âÉ¨µ½µã£©
-		//¼¤¹âÉ¨Ãè
-		//opsÐ£×¼
-		ops_calib_ok = 1;
-	}
-	
-	
-	if(!position_ok && ops_calib_ok){
-		//ops run 
-		if(flag_arrive){
-			//Í£³µ
-			flag_run = 0;
-			position_ok = 1;
-			ops_calib_ok = 0;
-		}
-	}
 
+//µ½´Ö¼Ó¹¤Çø
+void rough_Run(void){
+	static u8 position_run1 = 0, position_ok1 = 0, position_run2 = 0, position_ok2 = 0, position_run3 = 0, position_ok3 = 0, ops_calib_ok = 0;
+	//static u8 ops_calib_ok = 0; //ÏÈ²»Ð£×¼
+//	if(!position_ok && !ops_calib_ok ){
+//		//Âý×ß£¨Ö±µ½¼¤¹âÉ¨µ½µã£©
+//		//if ¼¤¹âÉ¨Ãèµ½½Ç
+//		OPS_Calibrate(-0.1, 1, 90); // ´ý¶¨
+//		ops_calib_ok = 1;
+//	}
 	
-	if(position_ok){
-		if ((mark1 & 0x0f) == (red & 0x01) && !ops_calib_ok){
-			if(!ops_calib_ok){
-				//openmvÕÒºìÉ«ÖÐÐÄ
-				//opsÐ£×¼
-				ops_calib_ok = 1;
-			}				
+//	if(!position_ok && ops_calib_ok){
+//		//ops run 
+//		if(flag_arrive){
+//			//Í£³µ
+//			position_ok = 1;
+//			ops_calib_ok = 0;
+//		}
+//	}
+	
+	if (!position_run1) //µ½×ª½Ç´¦
+	{
+		Set_Control_Mode(coordinateMode);
+		Set_Target_Coordinate(-0.1, 1.5);
+		position_run1 = 1;
+	}
+	
+	if(position_run1 && !position_ok1)
+	{
+		if (flag_arrive)
+				position_ok1 = 1;
+		return;
+	}
+	
+	if (position_ok1 && !position_run2) //×ªÏò
+	{
+		Set_Control_Mode(coordinateMode);
+		Set_Target_Heading(0);
+		position_run2 = 1;
+	}
+	
+	if(position_run2 && !position_ok2)
+	{
+		if (flag_arrive)
+				position_ok2 = 1;
+		return;
+	}
+	
+	if(position_ok2 && !position_run3) //µ½ºìÉ«±ê°ÐÎ»ÖÃ
+	{
+		Set_Control_Mode(coordinateMode);
+		Set_Target_Coordinate(-0.5, 1.5);
+		position_run2 = 1;
+	}
+	
+	if(position_run3 && !position_ok3)
+	{
+		if (flag_arrive)
+				position_ok3 = 1;
+		return;
+	}
+	
+	if(position_ok3 && !ops_calib_ok){
+		Set_Control_Mode(stop);
+		if ((mark1 & 0x0f) == (red & 0x01)){
+			OpenMV_Change_Mode(1);
+			//openmvÕÒºìÉ«ÖÐÐÄ
+			if(Openmv_Correction_Ready())
+			{
+				Set_Control_Mode(stop);
+			}
+			//opsÐ£×¼
+			OPS_Calibrate(-0.5, 1.5 ,0); //´ý¶¨
+			ops_calib_ok = 1;
 		}
 		
 		if(ops_calib_ok){
-			if(color_Index != 0){   //³µÉÏÓÐ¶«Î÷
+			if(color_Index != 0 || color_Index != 4){   //³µÉÏÓÐ¶«Î÷
 				rough_Put();
 			}
 			else{
 				rough_Get();
+				if(color_Index == 3)
+					run_Mode = depositMode;
+				else if(color_Index == 7)
+					run_Mode = depositMode2;
+	
 			}
 		}
 
 	}
 }
+
+void rough_Run_Main(void)
+{
+	switch(rough_Run_State)
+	{
+		case 1:
+			rough_Run();
+			break;
+	}
+}
+
+/*-----------------------------deposit--------------------------*/
+
+u8 deposit_Run_State = 1;
+
+//´Ö¼Ó¹¤µ½¹Õ½Ç + Ðý×ª
+void deposit_Run1(void){
+	//ops run µ½¹Õ½Ç
+	if(flag_arrive){
+		//ops run Ðý×ª
+		deposit_Run_State++;
+	}
+}
+
+//¿ªµ½¿¿½üÔÝ´æÇøÉÏ²ã²¢Ð£×¼
+void deposit_Run2(void){
+	static u8 position_ok = 0;
+	static u8 ops_calib_ok = 0;
+	if(flag_arrive && !position_ok){
+		//ops run µ½ºìÅÌ
+		position_ok = 1;
+	}
+	
+	if(flag_arrive && flag_stable && position_ok && !ops_calib_ok){
+		//pidÇåÁã
+		//ops ÂýÂýÏòÇ°
+		position_ok++;
+	}
+	
+	
+	if(flag_arrive && flag_stable && position_ok == 2){
+		//openmvÕÒºìÉ«ÖÐÐÄ£¨ÉÏ²ã£©
+		//ops Ð£×¼
+		ops_calib_ok = 1;
+	}
+	
+	
+	if(ops_calib_ok)
+		deposit_Run_State++;
+}
+
+//·ÅÖÃ
+void deposit_Put(void){
+	if( color_Index == 0 ){
+		deposit_Run_State++;
+	}
+	
+	else{
+		switch(qr_buff[3 - color_Index]){      // 3->210
+			case red:
+				//ops
+				if((mark1 & 0x0f) == red){
+					//if openmv ÕÒµ½ÖÐÐÄ
+					//Í£³µ
+					servo_Action(putRough, 1);
+				}
+				break;
+			case green:
+				//ops
+				if((mark1 & 0x0f) == green){
+					//if openmv ÕÒµ½ÖÐÐÄ
+					//Í£³µ
+					servo_Action(putRough, 1);
+				}
+				break;
+			case blue:
+				//ops
+				if((mark1 & 0x0f) == blue){
+					//if openmv ÕÒµ½ÖÐÐÄ
+					//Í£³µ
+					servo_Action(putRough, 1);
+				}
+				break;
+		}
+	}
+}
+
+
+void deposit_Run_Main(void)
+{
+	switch(deposit_Run_State)
+	{
+		case 1:
+			deposit_Run1();
+			break;
+		case 2:
+			deposit_Run2();
+			break;
+		case 3:
+			deposit_Put();
+			break;
+		case 4:
+			run_Mode = backObjMode;
+			break;
+	}
+}
+
+/*-----------------------------backObj--------------------------*/
+u8 backObj_Run_State = 1;
+
+void backObj_Run1(void){
+	static positionDes position_Des = back;
+	static u8 ops_calib_ok = 0;
+	//ops run ºóÍË
+	if(flag_arrive && position_Des == back){
+		position_Des = corner2_Pos;
+		//ops run »Øµ½¶þºÅ¹Õ½Ç
+	}
+	
+	if(flag_arrive && position_Des == corner2_Pos){
+		position_Des = corner1_Pos;
+		//ops run »Øµ½Ò»ºÅ¹Õ½Ç £¨Ö±×ß£©
+	}
+	
+	if(flag_arrive && position_Des == corner1_Pos){
+		//Âý×ß
+		//Ð£×¼ or ¼¤¹â¶ÔÆä
+		//ifÐ£×¼ ops_calib_ok = 1 
+		if(ops_calib_ok)
+			//ops run »Øµ½Ô­ÁÏÇø£¨ÏòÓÒ×ß£©
+			position_Des = object_Pos;
+	}
+	
+	if(flag_arrive && position_Des == object_Pos){
+		deposit_Run_State++;
+	}
+	
+}
+
+void backObj_Run_Main(){
+	switch(backObj_Run_State)
+	{
+		case 1:
+			backObj_Run1();
+			break;
+		case 2:
+			color_Index += 4;       //Index 4 = ³µÉÏ0 
+			run_Mode = objMode2;
+		
+//		case 2:
+//			backObj_Run2();
+//			break;
+//		case 3:
+//			backObj_Put();
+//			break;
+//		case 4:
+//			run_Mode = backObjMode;
+//			break;
+	}
+}
+
+/*-----------------------------objMode2--------------------------*/
+
+u8 obj2_Run_State = 1;
+
+
+void obj2_Run1(void)
+{
+	if((qr_buff[color_Index]&0x0f) == (mark1&0x0f)){
+		//×¥£¬Òª×öÑÓÊ±¿ØÖÆÊ±»ú£¬MV¼ì²âµ½Ê±É«¿é»¹²»Ò»¶¨ÎÈ¶¨ÏÂÀ´
+		servo_Action(getObj, 1); //Õâ¸öº¯Êý»á²»»á×èÈû£¿²»×èÈûÔòÒ²ÐèÒªÑÓÊ±
+		delay_ms(10000);          //
+		if(color_Index == 7){
+			obj2_Run_State++;
+		}
+	}
+}
+
+void obj2_Run_Main(){
+	switch(obj2_Run_State)
+	{
+		case 1:
+			obj2_Run1();
+			break;
+		case 2:
+			run_Mode = roughMode;
+			break;
+//		case 3:
+//			obj2_Run3();
+//			break;
+//		case 4:
+//			obj2_Run4();
+//			break;
+//		case 5:
+//			run_Mode = roughMode;
+//			break;
+	}
+}
+
+
+/*-----------------------------deposit2--------------------------*/
+
+u8 deposit2_Run_State = 1;
+
+//´Ö¼Ó¹¤µ½¹Õ½Ç + Ðý×ª
+void deposit2_Run1(void){
+	//ops run µ½¹Õ½Ç
+	if(flag_arrive){
+		//ops run Ðý×ª
+		deposit_Run_State++;
+	}
+}
+
+//¿ªµ½¿¿½üÔÝ´æÇøÉÏ²ã²¢Ð£×¼
+void deposit2_Run2(void){
+	static u8 position_ok = 0;
+	static u8 ops_calib_ok = 0;
+	if(flag_arrive && !position_ok){
+		//ops run µ½ºìÅÌ
+		position_ok = 1;
+	}
+	
+	if(flag_arrive && flag_stable && position_ok && !ops_calib_ok){
+		//pidÇåÁã
+		position_ok++;
+	}
+	
+	
+	if(flag_arrive && flag_stable && position_ok == 2){
+		//openmvÕÒºìÉ«ÖÐÐÄ£¨ÏÂ²ã£©
+		//ops Ð£×¼
+		ops_calib_ok = 1;
+	}
+	
+	
+	if(ops_calib_ok)
+		deposit_Run_State++;
+}
+
+
+void deposit2_Put(void){
+	if(color_Index == 4){
+		deposit2_Run_State++;
+	}
+	
+	switch(qr_buff[11 - color_Index]){  //11-7 11-6 11-5   7->654
+		case red:
+			//ops
+			if((mark1 & 0x0f) == red){
+				//if openmv ÕÒµ½ÖÐÐÄ
+				//Í£³µ
+				servo_Action(putRough, 1);
+			}
+			break;
+		case green:
+			//ops
+			if((mark1 & 0x0f) == green){
+				//if openmv ÕÒµ½ÖÐÐÄ
+				//Í£³µ
+				servo_Action(putRough, 1);
+			}
+			break;
+		case blue:
+			//ops
+			if((mark1 & 0x0f) == blue){
+				//if openmv ÕÒµ½ÖÐÐÄ
+				//Í£³µ
+				servo_Action(putRough, 1);
+			}
+			break;
+	}
+}
+
+void deposit2_Run_Main(void)
+{
+	switch(deposit2_Run_State)
+	{
+		case 1:
+			deposit2_Run1();
+			break;
+		case 2:
+			deposit2_Run2();
+			break;
+		case 3:
+			deposit2_Put();
+			break;
+		case 4:
+			run_Mode = homeMode;
+			break;
+	}
+}
+
+
+/*-----------------------------homeMode--------------------------*/
+
+u8 home_Run_State = 1;
+
+void home_Run1(void){
+	static positionDes position_Des = corner3_Pos;
+	static u8 ops_calib_ok = 0;
+	//ops run µ½ÈýºÅ¹Õ½Ç 
+	if(flag_arrive && position_Des == corner3_Pos){
+		//ops run ÂýÂý×óÒÆ
+//		if(Infrared_Scan()){       //
+			//Í£³µ
+			position_Des = back;
+//		}
+		
+	}
+	
+	if(flag_arrive && position_Des == back){
+		//ops run »Øµ½ÆðÍ£Çø
+		position_Des = home_Pos;
+	}
+	
+	if(flag_arrive && flag_stable && position_Des == home_Pos){
+		home_Run_State++;           
+	}
+	
+	
+}
+
+void home_Run_Main(void)
+{
+	switch(home_Run_State)
+	{
+		case 1:
+			home_Run1();
+			break;
+		case 2:
+			//Á÷³Ì½áÊø 
+			break;
+//		case 3:
+//			run_Mode = homeMode;
+//			break;
+//		case 4:
+//			run_Mode = homeMode;
+//			break;
+	}
+}
+
+
+

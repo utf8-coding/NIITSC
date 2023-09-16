@@ -5,7 +5,7 @@
 #include "delay.h"
 
 //public:
-int target_cx = 0, target_cy = 0;
+int mv_target_cx = 0, mv_target_cy = 0;
 u8 mark1 = 0;
 
 //internal:
@@ -78,8 +78,8 @@ void USART2_IRQHandler()
 			
 			//Target cx, cy data:
 			//possible bug here, MSB/LSB in advance?
-			target_cx = (OMV_data[3]|OMV_data[4]<<8) - IMAGE_SIZE_X/2;
-			target_cy = (OMV_data[5]|OMV_data[6]<<8) - IMAGE_SIZE_Y/2;
+			mv_target_cx = (OMV_data[3]|OMV_data[4]<<8) - IMAGE_SIZE_X/2;
+			mv_target_cy = (OMV_data[5]|OMV_data[6]<<8) - IMAGE_SIZE_Y/2;
 			
 			//mark1
 			mark1 = OMV_data[7];
@@ -91,9 +91,9 @@ void OpenMV_Display_Specs(void)
 {
 	OLED_ShowString(1, 2, "OpenMV:");
 
-	OLED_ShowSignedNum(2, 2, target_cx, 4);
+	OLED_ShowSignedNum(2, 2, mv_target_cx, 4);
 	OLED_ShowString(2, 7, ",");
-	OLED_ShowSignedNum(2, 8, target_cy, 4);
+	OLED_ShowSignedNum(2, 8, mv_target_cy, 4);
 }
 
 //Idle:0, Red:1, G:2, B:3, recog:4

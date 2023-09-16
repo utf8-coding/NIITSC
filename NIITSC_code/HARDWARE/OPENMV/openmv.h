@@ -24,7 +24,7 @@
 #define OPENMV_HEADER 								0x0055
 #define OPENMV_TAIL										0x66ff
 
-extern int target_cx, target_cy;
+extern int mv_target_cx, mv_target_cy;
 extern u8 mark1;
 
 void OPENMV_USART_Config(void);

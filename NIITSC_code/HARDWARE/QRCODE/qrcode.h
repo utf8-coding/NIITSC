@@ -26,6 +26,7 @@
 
 
 typedef enum {
+	scanning,
 	qrWrong,
 	qrRight
 }qrRecState;

@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\FWLIB\inc;..\USER;..\HARDWARE\MPU;..\HARDWARE\OPENMV;..\HARDWARE\OPS;..\HARDWARE\QRCODE;..\HARDWARE\SCREEN;..\HARDWARE\ZIGBEE;..\SYSTEM\Include;..\HARDWARE\INFRARED;..\HARDWARE\OLED;..\HARDWARE\ENCODER;..\HARDWARE\MOTOR;..\HARDWARE\CONTROL;..\HARDWARE\PID;..\HARDWARE\KEYMATRIX;..\HARDWARE\PWM;..\HARDWARE\SERIAL;..\HARDWARE\KEYNDISP;..\UTILS</IncludePath>
+              <IncludePath>..\CORE;..\FWLIB\inc;..\USER;..\HARDWARE\MPU;..\HARDWARE\OPENMV;..\HARDWARE\OPS;..\HARDWARE\QRCODE;..\HARDWARE\SCREEN;..\HARDWARE\SERVO;..\SYSTEM\Include;..\HARDWARE\INFRARED;..\HARDWARE\OLED;..\HARDWARE\ENCODER;..\HARDWARE\MOTOR;..\HARDWARE\CONTROL;..\HARDWARE\PID;..\HARDWARE\KEYMATRIX;..\HARDWARE\PWM;..\HARDWARE\SERIAL;..\HARDWARE\KEYNDISP;..\UTILS</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -685,11 +685,6 @@
               <FilePath>..\HARDWARE\SCREEN\screen.c</FilePath>
             </File>
             <File>
-              <FileName>zigbee.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\ZIGBEE\zigbee.c</FilePath>
-            </File>
-            <File>
               <FileName>infrared.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\INFRARED\infrared.c</FilePath>
@@ -724,6 +719,16 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\KEYNDISP\keyndisp.c</FilePath>
             </File>
+            <File>
+              <FileName>LobotServoController.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\SERVO\LobotServoController.c</FilePath>
+            </File>
+            <File>
+              <FileName>servo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\SERVO\servo.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -738,5 +743,14 @@
     <components/>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>Project</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

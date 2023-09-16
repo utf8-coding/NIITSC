@@ -30,16 +30,28 @@ typedef struct
 	float error;
 }  PID;
 
+typedef enum
+{
+	coordinateMode,
+	velocityMode,
+	stop
+} ControlMode;
+
 
 extern u8 speed_limit, angular_speed_limit;
-extern float target_x, target_y, target_heading;
 
-void PID_Init(void);
-void Wheel_Run_Loop(void);
-void Set_Target_Coordinate(float x,float y ,float heading);
-void Wheel_Speed_Calc(float vx, float vy, float vw);
-void Go_Direction_Test(float vx,float vy,float vw);
-void Go_Position_Test(float x, float y, float heading);
 void Control_Display_Specs(void);
+void Go_Position_Test(float x, float y, float heading);
+void Wheel_Run_Loop(void);
+void Set_Speed(float x,float y,float vw);
+void Set_Target_Heading(float heading);
+void Set_Target_Coordinate(float x, float y);
+void Set_Control_Mode(ControlMode mode);
+void Openmv_Correction(void);
+u8 Openmv_Correction_Ready(void);
+void Control_Init(void);
+void Turn_Left90(void);
+void Turn_Right90(void);
+
 
 #endif

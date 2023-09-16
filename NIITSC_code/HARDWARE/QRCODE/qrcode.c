@@ -1,6 +1,6 @@
 #include "qrcode.h"
 
-qrRecState qr_state = qrWrong;
+qrRecState qr_state = scanning;
 u8 qr_buff[QR_BUFF_SIZE] = {0};
 
 void QRCODE_UART_Config(void) 

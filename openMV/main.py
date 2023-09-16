@@ -118,7 +118,7 @@ if __name__ == '__main__':
             blue_led.on()
             blobs = img.find_blobs([blue_target_th], merge = False, area_threshold = area_th)
             mark0 = mark0|0x04
-         elif flag_mode == 4:
+        elif flag_mode == 4:
             red_led.on()
             green_led.on()
             blue_led.on()

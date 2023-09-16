@@ -4,7 +4,7 @@
 #include "oled.h"
 #include "mpu.h"
 #include "openmv.h"
-#include "zigbee.h"
+#include "servo.h"
 #include "qrcode.h"
 #include "ops.h"
 #include "screen.h"
@@ -26,24 +26,16 @@ int main(void)
 	OPS_Init();
 	Motor_Init();
 	OLED_Init();
-	PID_Init();
+	Control_Init();
 	
 //	MPU_USART_Config();
 //	OPENMV_USART_Config();
 //	ZIGBEE_USART_Config();
-//	QRCODE_UART_Config();
+	QRCODE_UART_Config();
 //	SCREEN_USART_Config();
 	
 //	Laser_Init();
 	
-	
-//	OLED_ShowChar(1, 1, 'A');
-//	OLED_ShowString(1, 3, "HelloWorld!");
-//	OLED_ShowNum(2, 1, 12345, 5);
-//	OLED_ShowSignedNum(2, 7, -66, 2);
-//	OLED_ShowHexNum(3, 1, 0xAA55, 4);
-//	OLED_ShowBinNum(4, 1, 0xAA55, 16);
-
 	while (1)
 	{
 		if(!flag_ops_ready){
@@ -53,9 +45,10 @@ int main(void)
 		Input_Disp_Loop();
 		if (flag_start)
 		{
-			speed_limit = 80;
-			Go_Position_Test(0.80, 0.80, 0);
-			//Run();
+//			speed_limit = 80;
+//			Go_Position_Test(-0.15, 1.8, 0);
+			speed_limit = 50;
+			Run();
 		} else
 		{
 			Set_Speed_All(0, 0, 0, 0);

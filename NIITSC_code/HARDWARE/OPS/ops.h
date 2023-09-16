@@ -32,6 +32,7 @@ extern int32_t OPS_ring;
 
 void OPS_Init(void);
 void OPS_Display_Specs(void);
+void OPS_Calibrate(float x, float y, float heading);
 
 // #define pos_x -OPS.ActVal[4]
 // #define pos_y -OPS.ActVal[5]
