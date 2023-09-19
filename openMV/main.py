@@ -1,5 +1,9 @@
 import sensor, image, time, ustruct, math
-from pyb import UART, LED
+from pyb import UART, LED, Pin
+
+pin1 = Pin('P4', Pin.OUT_PP)
+pin2 = Pin('P5', Pin.OUT_PP)
+
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -25,7 +29,7 @@ green_led = LED(2)
 blue_led  = LED(3)
 
 clock = time.clock()
-uart = UART(3, 9600)
+#uart = UART(3, 9600)
 
 def IMG_init():
     sensor.reset()
@@ -49,23 +53,23 @@ def draw_keypoints(img, kpts):
         time.sleep_ms(1000)
 
 def send_data(mark0, cx, cy, mark1):
-    global uart
+    #global uart
     data = ustruct.pack("<bbbhhbbb",
-                   0x00,
-                   0x55,
+                   0x5A,
+                   0x5A,
                    mark0, # 0x00, 高四位是目前过滤器颜色 0x10红 0x20绿色 0x04蓝色
                    cx,
                    cy,
                    mark1,
-                   0x66,
-                   0xff)
-    uart.write(data);
+                   0xA6,
+                   0xA6)
+    #uart.write(data);
 
 #def
 
 if __name__ == '__main__':
     IMG_init()
-    flag_mode = 2 # 0：待机 1：红色 2：绿色 3：蓝色 4：所有颜色，调试用
+    flag_mode = 4 # 0：待机 1：红色 2：绿色 3：蓝色 4：颜色测试
 
     while(True):
         clock.tick()
@@ -80,20 +84,20 @@ if __name__ == '__main__':
         blobs = []
 
         # 模式处理：指令（0x01 红 0x02绿 0x03蓝）
-        if uart.any():
-            cmd_byte_array = uart.read()
-            if cmd_byte_array[-1] == 0x00:
-                flag_mode = 0
-            elif cmd_byte_array[-1]&0x01:
-                flag_mode = 1
-            elif cmd_byte_array[-1]&0x02:
-                flag_mode = 2
-            elif cmd_byte_array[-1]&0x03:
-                flag_mode = 3
-            elif cmd_byte_array[-1]&0x04:
-                flag_mode = 4
-            else:
-                flag_mode = 0
+        #if uart.any():
+            #cmd_byte_array = uart.read()
+            #if cmd_byte_array[-1] == 0x00:
+                #flag_mode = 0
+            #elif cmd_byte_array[-1]&0x01:
+                #flag_mode = 1
+            #elif cmd_byte_array[-1]&0x02:
+                #flag_mode = 2
+            #elif cmd_byte_array[-1]&0x03:
+                #flag_mode = 3
+            #elif cmd_byte_array[-1]&0x04:
+                #flag_mode = 4
+            #else:
+                #flag_mode = 0
 
         if flag_mode == 0:
             red_led.off()
@@ -123,9 +127,11 @@ if __name__ == '__main__':
             green_led.on()
             blue_led.on()
 
-            blobs_r = img.find_blobs([red_target_th], merge = False, area_threshold = area_th)
-            blobs_g = img.find_blobs([green_target_th], merge = False, area_threshold = area_th)
-            blobs_b = img.find_blobs([blue_target_th], merge = False, area_threshold = area_th)
+            blobs_r = img.find_blobs([red_target_th], roi = (85, 88, 103, 103), merge = False, area_threshold = area_th)
+            blobs_g = img.find_blobs([green_target_th],roi = (85, 88, 103, 103), merge = False, area_threshold = area_th)
+            blobs_b = img.find_blobs([blue_target_th],roi = (85, 88, 103, 103), merge = False, area_threshold = area_th)
+            r_blob = []; g_blob = []; b_blob = [];
+            r_blob = 0; g_blob = 0; b_blob = 0;
             if blobs_r:
                 r_blob = max(blobs_r, key = lambda x: x.area())
             if blobs_g:
@@ -133,15 +139,22 @@ if __name__ == '__main__':
             if blobs_b:
                 b_blob = max(blobs_b, key = lambda x: x.area())
             colors = [r_blob, g_blob, b_blob]
-            dist = (IMG_W/2)^2+(IMG_H/2)^2
+            color = 0
+            dist = (IMG_W/2)**2+(IMG_H/2)**2
             for i in range(0, 3):
-                if (colors[i].cx - IMG_W/2)^2+(colors[i].cy - IMG_H/2)^2 < dist:
-                    dist = (colors[i].cx - IMG_W/2)^2+(colors[i].y - IMG_H/2)^2
-                    color = i+1
-            mark1 = mark1 | color
-
-
-
+                if colors[i] != 0:
+                    if (colors[i].cx() - int(IMG_W/2))**2+(colors[i].cy() - int(IMG_H/2))**2 < dist:
+                        dist = (colors[i].cx() - IMG_W/2)**2+(colors[i].cy() - IMG_H/2)**2
+                        color = i+1
+            if color&0x01:
+                pin1.high()
+            else:
+                pin1.low()
+            if color&0x02:
+                pin2.high()
+            else:
+                pin2.low()
+            print(color);
             mark0 = mark0|0x08
 
         if blobs:
@@ -150,7 +163,7 @@ if __name__ == '__main__':
             cy = target_blob.cy()
 
         # 图像调试内容：
-        print(cx, cy)
+        #print(cx, cy)
         blobs_r = []; blobs_g = []; blobs_b = []
         if flag_mode == 5:
             blobs_r = img.find_blobs([red_target_th], merge = True, area_threshold = area_th)

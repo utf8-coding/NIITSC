@@ -16,7 +16,7 @@
 #define OPS_UART_RX_PIN						GPIO_Pin_2            
 #define	OPS_UART_RX_PORT						GPIOD                 
 #define	OPS_UART_RX_CLK						RCC_AHB1Periph_GPIOD    
-#define OPS_UART_RX_PinSource     				GPIO_PinSource2 
+#define OPS_UART_RX_PinSource     				GPIO_PinSource2  
 
 #define GPIO_AF_OPS_UART                       GPIO_AF_UART5
 #define OPS_UART_IRQn                          UART5_IRQn

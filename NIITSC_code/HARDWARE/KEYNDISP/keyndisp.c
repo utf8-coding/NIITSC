@@ -7,6 +7,8 @@
 #include "delay.h"
 #include "openmv.h"
 #include "control.h"
+#include "serial.h"
+#include "infrared.h "
 
 static int min_page = -1, max_page = 3, min_var_page = 0, max_var_page = 3;
 int flag_varmod = 0;
@@ -267,6 +269,7 @@ void Input_Disp_Loop(void)
 
 				OLED_ShowString(3, 2, "Run test");
 				OLED_ShowString(4, 14, "p0");
+				OLED_ShowBinNum(4, 1, Infrared_Scan(), 6);
 				break;
 			case 1:
 				OPS_Display_Specs();
@@ -301,14 +304,4 @@ void Input_Disp_Loop(void)
 
 void System_Test(int d)
 {
-	Set_Speed_All(50, 0, 0, 0);
-	delay_ms(500);
-	Set_Speed_All(0, 50, 0, 0);
-	delay_ms(500);
-	Set_Speed_All(0, 0, 50, 0);
-	delay_ms(500);
-	Set_Speed_All(0, 0, 0, 50);
-	delay_ms(500);
-	Set_Speed_All(0, 0, 0, 0);
-	delay_ms(200);
 }

@@ -2,7 +2,8 @@
 #define	__SERVO_H
 #include "stm32f4xx.h"
 #include "stdio.h"
- #include "sys.h" 
+#include "LobotServoController.h"
+#include "sys.h" 
 
 
 //Òý½Å¶¨Òå
@@ -56,24 +57,25 @@
 
 
 typedef enum{
-	defaut,   
+	defaut,      
 	calib,
 	getObj,
 	getRough,
 	putRough,
-	putUpDep,
-	putDownDep
+	putDownDep1,
+	putDownDep2
 }servoAction;
 
-typedef enum{	
-	backOpen,           //0
-	screwFront,		//1
-	handGet, 		
-	handRelease,
-	plateRotate1,
-	plateRotate2,
-	plateRotate3,
-	screwBack
+typedef enum{
+	defa,				//0
+	screwFront,			//1
+	screwBack,			//2
+	handGet, 			//3
+	handRelease,		//4
+	plateRotate1,		//5
+	plateRotate2,		//6	
+	plateRotate3,		//7
+	
 }servoTypeEnum;
 
 typedef enum{
@@ -92,11 +94,23 @@ extern u8 USART_RX_STA;         //½ÓÊÕ×´Ì¬±ê¼Ç
 void SERVO_USART_Config(void);
 void uartWriteBuf(uint8_t *buf, uint8_t len);
 //void servo_Action(servoAction actionNum, u16 Times);
-void servo_Action(servoAction actionNum, servoTypeEnum platePos);
 
 void Moto_Init(u32 arr, u32 psc);
 void Moto_Dir_Init(void);
 void MOTO_PWM_Init(u32 arr, u32 psc);
-void moto_Action(motoDirEnum dir, int8_t speed);
+void moto_Action(motoDirEnum dir, int8_t speed, u16 nms);
+
+
+void plateRotate(u8 color_Index, u16 nms);
+void servoDefault(void);
+void servoMvCalib(void);
+void get_Obj(void);
+void put_Rough(void);
+void get_Rough(void);
+void put_Up_Dep(void);
+void put_Down_Dep(void);
+void put_Down_Dep1(void);
+void put_Down_Dep2(void);
+void servo_Action(servoAction actionNum);
 
 #endif 

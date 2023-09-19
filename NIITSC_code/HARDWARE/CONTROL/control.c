@@ -54,7 +54,7 @@ void check_stable(void)
 	else
 		flag_stable = 0;
 	
-	if(fabs(x_pid.error) < 0.015 && fabs(y_pid.error) < 0.015 && fabs(heading_pid.error) < 1.5)
+	if(fabs(x_pid.error) < 0.025 && fabs(y_pid.error) < 0.025 && fabs(heading_pid.error) < 1.5)
 		flag_arrive = 1;
 	else
 		flag_arrive = 0;
@@ -189,7 +189,7 @@ void Turn_Right90(void)
 	wheel_speed_calc(0, 0, 0.5);
 	Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
 	
-	while(OPS_heading + OPS_ring*360 <= turn_heading);
+	while(OPS_heading + OPS_ring*360 <= turn_heading-1);
 	
 	if (ideal_heading >= 180)
 	{
@@ -209,7 +209,7 @@ void Turn_Left90(void)
 	wheel_speed_calc(0, 0, -0.5);
 	Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
 	
-	while(OPS_heading + OPS_ring*360 >= turn_heading);
+	while(OPS_heading + OPS_ring*360 >= turn_heading+1);
 	
 	if (ideal_heading <= -180)
 	{

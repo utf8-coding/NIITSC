@@ -34,7 +34,7 @@ void SCREEN_USART_Config(void)
     USART_Init(SCREEN_USART,&USART_InitStructure); //初始化串口1
     USART_Cmd(SCREEN_USART,ENABLE); //使能串口1
     
-    USART_ITConfig(SCREEN_USART, USART_IT_RXNE, ENABLE);
+    //USART_ITConfig(SCREEN_USART, USART_IT_RXNE, ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = SCREEN_USART_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;

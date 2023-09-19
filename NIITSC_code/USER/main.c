@@ -15,6 +15,8 @@
 #include "keyndisp.h"
 #include "flags.h"
 #include "run.h"
+#include "buzzer.h"
+#include "serial.h"
 
 /* Private functions ---------------------------------------------------------*/
 int main(void)
@@ -30,15 +32,39 @@ int main(void)
 	
 //	MPU_USART_Config();
 //	OPENMV_USART_Config();
-//	ZIGBEE_USART_Config();
 	QRCODE_UART_Config();
-//	SCREEN_USART_Config();
+	SCREEN_USART_Config();
+	SERVO_USART_Config();
+	Moto_Init(18 - 1, 8400 -1);
+	Laser_Init();
+	//BUZZER_Init();
 	
-//	Laser_Init();
+//	OLED_ShowChar(1, 1, 'A');
+//	OLED_ShowString(1, 3, "HelloWorld!");
+//	OLED_ShowNum(2, 1, 12345, 5);
+//	OLED_ShowSignedNum(2, 7, -66, 2);
+//	OLED_ShowHexNum(3, 1, 0xAA55, 4);
+//	OLED_ShowBinNum(4, 1, 0xAA55, 16);
 
+	servoDefault();
+	//BUZZER_Ms();
+	delay_ms(1000);
+	
+	unsigned char starter[9] = "CLR(0);";
+	starter[7] = 0x0d;
+	starter[8] = 0x0a;
+	Serial_SendArray(USART6, &starter[0], 9);
+	delay_ms(100);
+	
+	unsigned char starter2[9] = "DIR(1);";
+	starter2[7] = 0x0d;
+	starter2[8] = 0x0a;
+	Serial_SendArray(USART6, &starter2[0], 9);
+	delay_ms(100);
 	
 	while (1)
 	{
+		OpenMV_Data_Handle();
 		if(!flag_ops_ready){
 			OLED_ShowString(1, 1, "OPS prep.");
 			continue;
@@ -46,9 +72,13 @@ int main(void)
 		Input_Disp_Loop();
 		if (flag_start)
 		{
-//			speed_limit = 80;
-//			Go_Position_Test(-0.15, 1.8, 0);
-			speed_limit = 50;
+			//speed_limit = 80
+//			Set_Control_Mode(coordinateMode);
+//			Go_Position_Test(-0.15, 1.5, 90);
+			
+//			Set_Control_Mode(velocityMode);
+//			Set_Speed(-0.2, 0, 0);
+//			Wheel_Run_Loop();
 			Run();
 		} else
 		{

@@ -89,7 +89,7 @@ void UART5_IRQHandler()
 			OPS_x = OPS_data.ActVal[4]/1000;
 			OPS_y = OPS_data.ActVal[5]/1000; //m
 		}
-		
+
 		if(OPS_heading+OPS_x+OPS_y != 0 && !flag_ops_ready)
 			flag_ops_ready = 1;
 	}

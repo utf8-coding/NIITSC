@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\FWLIB\inc;..\USER;..\HARDWARE\MPU;..\HARDWARE\OPENMV;..\HARDWARE\OPS;..\HARDWARE\QRCODE;..\HARDWARE\SCREEN;..\HARDWARE\SERVO;..\SYSTEM\Include;..\HARDWARE\INFRARED;..\HARDWARE\OLED;..\HARDWARE\ENCODER;..\HARDWARE\MOTOR;..\HARDWARE\CONTROL;..\HARDWARE\PID;..\HARDWARE\KEYMATRIX;..\HARDWARE\PWM;..\HARDWARE\SERIAL;..\HARDWARE\KEYNDISP;..\UTILS</IncludePath>
+              <IncludePath>..\CORE;..\FWLIB\inc;..\USER;..\HARDWARE\MPU;..\HARDWARE\OPENMV;..\HARDWARE\OPS;..\HARDWARE\QRCODE;..\HARDWARE\SCREEN;..\HARDWARE\SERVO;..\SYSTEM\Include;..\HARDWARE\INFRARED;..\HARDWARE\OLED;..\HARDWARE\ENCODER;..\HARDWARE\MOTOR;..\HARDWARE\CONTROL;..\HARDWARE\PID;..\HARDWARE\KEYMATRIX;..\HARDWARE\PWM;..\HARDWARE\SERIAL;..\HARDWARE\KEYNDISP;..\UTILS;..\HARDWARE\BUZZER;..\HARDWARE\DMA</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -728,6 +728,11 @@
               <FileName>servo.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\SERVO\servo.c</FilePath>
+            </File>
+            <File>
+              <FileName>buzzer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\BUZZER\buzzer.c</FilePath>
             </File>
           </Files>
         </Group>

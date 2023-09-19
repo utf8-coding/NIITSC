@@ -7,10 +7,12 @@
 #include "ops.h"
 #include "infrared.h"
 #include "delay.h"
+#include "serial.h"
+#include "motor.h"
 
 
 u8 color_Index = 0; // 车上的数量  
-const float slow_move_speed = 0.18;
+const float slow_move_speed = 0.3;
 
 void qr_Run_Main(void);
 void obj_Run_Main(void);
@@ -70,9 +72,10 @@ void qr_Run2(void)
 	if(flag_arrive)
 	{
 		//到位慢慢往前
-		Set_Control_Mode(velocityMode);
-		Set_Speed(0, slow_move_speed, 0); //慢慢往前
+//		Set_Control_Mode(velocityMode);
+//		Set_Speed(0, slow_move_speed, 0); //慢慢往前
 		qr_Run_State = 3;
+		flag_arrive = 0;
 	}
 }
 
@@ -83,8 +86,19 @@ void qr_Run3(void)
 		Set_Control_Mode(stop); //错了停车再扫
 	else if (QR_Ready() == qrRight)
 	{
-		//扫好了，右转90
-		Turn_Right90();
+		Set_Control_Mode(stop);
+		unsigned char starter[26] = "DC32(10,10,'321+123',1);";
+		starter[12] = qr_buff[0];
+		starter[13] = qr_buff[1];
+		starter[14] = qr_buff[2];
+		starter[15] = qr_buff[3];
+		starter[16] = qr_buff[4];
+		starter[17] = qr_buff[5];
+		starter[18] = qr_buff[6];
+		starter[24] = 0x0d;
+		starter[25] = 0x0a;
+		Serial_SendArray(USART6, &starter[0], 26);
+		delay_ms(100);
 		qr_Run_State = 4; //进下一阶段
 	}
 	else if (QR_Ready() == scanning && OPS_y > 1.8f)
@@ -118,56 +132,66 @@ void obj_Run1(void)
 {
 	//快走到圆盘前面一点点
 	Set_Control_Mode(coordinateMode);
-	Set_Target_Coordinate(-0.18, 1.0);
+	Set_Target_Coordinate(-0.18, 1.45);
 	speed_limit = 50;
 	obj_Run_State++;
 }
 
+//void obj_Run2(void)
+//{
+//	if(flag_arrive)
+//	{
+//		Turn_Right90();
+//		servoMvCalib();
+//		//向左走，走到红外标定的位置，速度待定：
+//		Set_Control_Mode(velocityMode);
+//		Set_Speed(-slow_move_speed, 0, 0);
+//		obj_Run_State++;
+//	}
+//}
+
+//void obj_Run3(void)
+//{
+//	//等待红外检测到，假设是一号 C0，由亮色到暗色是变成0
+//	if(~Infrared_Scan() & 0x04)
+//	{
+//		//向前走，去对齐另一个激光的边缘
+//		Set_Speed(0, slow_move_speed, 0);
+//		obj_Run_State++;
+//	}	
+//}
+
+//void obj_Run2(void)
+//{
+//	//假设是二号 C1
+//	if(Infrared_Scan() & 0x01){
+//		Set_Control_Mode(stop); //停下来
+//		obj_Run_State++;
+//	}
+//}
+
 void obj_Run2(void)
 {
-	if(flag_arrive&&flag_stable)
-	{
-		//向左走，走到红外标定的位置，速度待定：
-		Set_Control_Mode(velocityMode);
-		Set_Speed(-slow_move_speed, 0, 0);
+	//假设是二号 C1
+	if(flag_arrive){
+		Turn_Right90();
+		servoMvCalib();
+		Set_Speed_All(20, 20, 20, 20);
+		while(Infrared_Scan() & 0x04);
+		Set_Control_Mode(stop);
 		obj_Run_State++;
 	}
 }
+
 
 void obj_Run3(void)
 {
-	//等待红外检测到，假设是一号 C0，由暗色到亮色是变成0
-	if(Infrared_Scan() & 0x01)
-	{
-		flag_start = 0;
-		//向前走，去对齐另一个激光的边缘
-		Set_Speed(0, slow_move_speed, 0);
-		obj_Run_State++;
-	}	
-}
-
-void obj_Run4(void)
-{
-	//假设是二号 C1
-	if(Infrared_Scan() & 0x02){
-		Set_Control_Mode(stop); //停下来
-
-		if(!OpenMV_Change_Mode(4))
-			flag_start = 0; //MV初始化失败，等待手工重置
-		
-		obj_Run_State++;
-	}
-}
-
-
-void obj_Run5(void)
-{
 	if((qr_buff[color_Index]&0x0f) == (mark1&0x0f)){
 		//抓，要做延时控制时机，MV检测到时色块还不一定稳定下来
-		servo_Action(getObj, 1); //这个函数会不会阻塞？不阻塞则也需要延时
-		delay_ms(10000);          //
+		servo_Action(getObj); //这个函数会不会阻塞？不阻塞则也需要延时
 		if(color_Index == 3){
 			obj_Run_State++;
+			flag_start = 0;
 		}
 	}
 }
@@ -186,9 +210,12 @@ void obj_Run_Main(void)
 			obj_Run3();
 			break;
 		case 4:
-			obj_Run4();
-			break;
-		case 5:
+//			obj_Run4();
+//			break;
+//		case 5:
+//			obj_Run5();
+//			break;
+//		case 6:
 			run_Mode = roughMode;
 			break;
 	}
@@ -230,8 +257,7 @@ void rough_Put(void){
 				{
 					Set_Control_Mode(stop);
 					//停车
-					servo_Action(putRough, 1);
-					delay_ms(10000);
+					servo_Action(putRough);
 					flag_running = 0; flag_on_location = 0;
 				}
 			}
@@ -256,8 +282,7 @@ void rough_Put(void){
 				{
 					Set_Control_Mode(stop);
 					//停车
-					servo_Action(putRough, 1);
-					delay_ms(10000);
+					servo_Action(putRough);
 					flag_running = 0; flag_on_location = 0;
 				}
 			}
@@ -282,8 +307,7 @@ void rough_Put(void){
 				{
 					Set_Control_Mode(stop);
 					//停车
-					servo_Action(putRough, 1);
-					delay_ms(10000);
+					servo_Action(putRough);
 					flag_running = 0; flag_on_location = 0;
 				}
 			}
@@ -306,7 +330,7 @@ void rough_Get(void){
 			if((mark1 & 0x0f) == red){
 				//if openmv 找到中心
 				//停车
-				servo_Action(getRough, 1);
+				servo_Action(getRough);
 			}
 			break;
 		case green:
@@ -314,7 +338,7 @@ void rough_Get(void){
 			if((mark1 & 0x0f) == green){
 				//if openmv 找到中心
 				//停车
-				servo_Action(getRough, 1);
+				servo_Action(getRough);
 			}
 			break;
 		case blue:
@@ -322,7 +346,7 @@ void rough_Get(void){
 			if((mark1 & 0x0f) == blue){
 				//if openmv 找到中心
 				//停车
-				servo_Action(getRough, 1);
+				servo_Action(getRough);
 			}
 			break;
 	}
@@ -484,7 +508,7 @@ void deposit_Put(void){
 				if((mark1 & 0x0f) == red){
 					//if openmv 找到中心
 					//停车
-					servo_Action(putRough, 1);
+					servo_Action(putDownDep1);
 				}
 				break;
 			case green:
@@ -492,7 +516,7 @@ void deposit_Put(void){
 				if((mark1 & 0x0f) == green){
 					//if openmv 找到中心
 					//停车
-					servo_Action(putRough, 1);
+					servo_Action(putDownDep1);
 				}
 				break;
 			case blue:
@@ -500,7 +524,7 @@ void deposit_Put(void){
 				if((mark1 & 0x0f) == blue){
 					//if openmv 找到中心
 					//停车
-					servo_Action(putRough, 1);
+					servo_Action(putDownDep1);
 				}
 				break;
 		}
@@ -590,7 +614,7 @@ void obj2_Run1(void)
 {
 	if((qr_buff[color_Index]&0x0f) == (mark1&0x0f)){
 		//抓，要做延时控制时机，MV检测到时色块还不一定稳定下来
-		servo_Action(getObj, 1); //这个函数会不会阻塞？不阻塞则也需要延时
+		servo_Action(getObj); //这个函数会不会阻塞？不阻塞则也需要延时
 		delay_ms(10000);          //
 		if(color_Index == 7){
 			obj2_Run_State++;
@@ -671,7 +695,7 @@ void deposit2_Put(void){
 			if((mark1 & 0x0f) == red){
 				//if openmv 找到中心
 				//停车
-				servo_Action(putRough, 1);
+				servo_Action(putDownDep2);
 			}
 			break;
 		case green:
@@ -679,7 +703,7 @@ void deposit2_Put(void){
 			if((mark1 & 0x0f) == green){
 				//if openmv 找到中心
 				//停车
-				servo_Action(putRough, 1);
+				servo_Action(putDownDep2);
 			}
 			break;
 		case blue:
@@ -687,7 +711,7 @@ void deposit2_Put(void){
 			if((mark1 & 0x0f) == blue){
 				//if openmv 找到中心
 				//停车
-				servo_Action(putRough, 1);
+				servo_Action(putDownDep2);
 			}
 			break;
 	}

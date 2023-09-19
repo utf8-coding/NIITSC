@@ -6,7 +6,6 @@
 #include "run.h"
 #include "delay.h"
 //plate 1  screw 2  hand 3
-
 u8 UART_RX_BUF[16];
 bool isUartRxCompleted = false;
 
@@ -42,7 +41,7 @@ void SERVO_USART_Config(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(SERVO_USART_TX_PORT, &GPIO_InitStructure);       
     GPIO_Init(SERVO_USART_RX_PORT, &GPIO_InitStructure);
     
@@ -78,7 +77,7 @@ void uartWriteBuf(uint8_t *buf, uint8_t len)
 
 extern uint8_t LobotRxBuf[16];
 
-void SERVO_USART_IRQHandler(void)
+void USART3_IRQHandler(void)
 {
 	uint8_t Res;
 	static bool isGotFrameHeader = false;
@@ -122,144 +121,153 @@ void SERVO_USART_IRQHandler(void)
 	}
 }
 
-
-
-//void servo_Action(servoAction actionNum, u16 Times){
-//	runActionGroup(actionNum, Times);
-//	if( actionNum < mid_flag ){
-//		color_Index++;
-//	}
-//	else{
-//		color_Index--;
-//	}
-//}
-
 void servoDefault(void){
-	//丝杆升高
-	//d
-	runActionGroup(backOpen, 1);  //张开 向内
+//	moto_Action(up, 9, 500);
+	runActionGroup(defa, 1);  //张开 向内
 }
 
 void servoMvCalib(void){
-	runActionGroup(screwFront, 1); //向外 张开
+	runActionGroup(screwFront, 1); 
+	delay_ms(200);
 }
 
-void get_Obj(servoTypeEnum platePos){
-	//丝杆下降快
-	//d
-	
-	runActionGroup(handGet, 1);
-	//d
-	
-	//升快
-	runActionGroup(platePos, 1);   //同时转盘子
-	//d
-	runActionGroup(screwBack, 1);  
-	//d
-	
-	//丝杆下降
-	//d
-	
-	runActionGroup(handRelease, 1); 
-	//d
 
-	//up
-	//d
-	
-	servoMvCalib(); //可能放外面
+void plateRotate(u8 color_Index, u16 nms){
+	switch(color_Index){
+		case 0:
+		case 4:
+			runActionGroup(plateRotate1, 1);
+			delay_ms(nms);
+			break;
+		case 1:
+		case 5:
+			runActionGroup(plateRotate2, 1);
+			delay_ms(nms);
+			break;
+		case 2:
+		case 6:
+			runActionGroup(plateRotate3, 1);
+			delay_ms(nms);
+			break;
+	}
 }
-/*--------------------------------------------------*/
-void put_Rough(servoTypeEnum platePos){
-	runActionGroup(backOpen, 1);  //张开 向内
-	//d
-	runActionGroup(platePos, 1);
-	//d
-	//down
-	//d
+/*=============================obj============================*/
+void get_Obj(void){
+	
+//	runActionGroup(screwFront, 1);		//2700
+	runActionGroup(handRelease, 1);		//2700
+	moto_Action(down, 9, 4000);   
+	
 	runActionGroup(handGet, 1);
-	//d
-	//up
-	//d
+	delay_ms(700);	
+	
+	runActionGroup(screwBack, 1);		//2700
+	delay_ms(100);
+	plateRotate(color_Index, 10);
+	moto_Action(up, 9, 4050);     
+	
+	//放盘
+	moto_Action(down, 9, 1200);
+	runActionGroup(handRelease ,1);
+	delay_ms(300);
+	moto_Action(up, 9, 1200);
+	
+	runActionGroup(screwFront, 1);		//2700
+}
+
+/*===============================rough=============================*/
+void put_Rough(void){
+	runActionGroup(handRelease, 1);	
+	delay_ms(10);
+	//回转
+	runActionGroup(screwBack, 1);		//2700
+	delay_ms(2700);
+
+	//收盘
+	plateRotate(color_Index, 10);
+	moto_Action(down, 9, 1200);
+	runActionGroup(handGet ,1);
+	delay_ms(300);
+	moto_Action(up, 9, 1200);
+	
 	runActionGroup(screwFront, 1); //向外
-	//d
-	//down
-	//d
-	runActionGroup(handRelease, 1); 
-	//d
-	//up
-	//d
+	delay_ms(10);
+	moto_Action(down, 9, 8900);
+	runActionGroup(handRelease,1);
+	delay_ms(300);
+	moto_Action(up, 9, 8900);
 }
 
-void get_Rough(servoTypeEnum platePos){
-	//丝杆下降快
-	//d
+void get_Rough(void){
+	//拿地
+	runActionGroup(handRelease, 1);		//2700
+	moto_Action(down, 9, 8500);
+	runActionGroup(handGet, 1);
+	delay_ms(300);
+	//回转 
+	runActionGroup(screwBack, 1);		//2700
+	delay_ms(10);
+	//转盘
+	plateRotate(color_Index, 10);
+	//同时上升
+	moto_Action(up, 9, 8700);
 	
 	runActionGroup(handGet, 1);
-	//d
-	
-	//升快
-	runActionGroup(platePos, 1);   //同时转盘子
-	//d
-	runActionGroup(screwBack, 1);  
-	//d
-	
-	//丝杆下降
-	//d
-	
-	runActionGroup(handRelease, 1); 
-	//d
+	delay_ms(300);
 
-	//up
-	//d
+	//放盘
+	moto_Action(down, 9, 1200);
+	runActionGroup(handRelease,1);
+	delay_ms(300);
+	moto_Action(up, 9, 1200);
 	
-	servoMvCalib(); //可能放外面
 }
 
-void put_Up_Dep(servoTypeEnum platePos){
-	runActionGroup(backOpen, 1);  //张开 向内
-	//d
-	runActionGroup(platePos, 1);
-	//d
-	//down
-	//d
-	runActionGroup(handGet, 1);
-	//d
-	//up
-	//d
+void put_Down_Dep1(void){
+	runActionGroup(handRelease, 1);	
+	delay_ms(10);
+	//回转
+	runActionGroup(screwBack, 1);		//2700
+	delay_ms(2700);
+
+	//收盘
+	plateRotate(color_Index, 10);
+	moto_Action(down, 9, 1200);
+	runActionGroup(handGet ,1);
+	delay_ms(300);
+	moto_Action(up, 9, 1200);
+	
 	runActionGroup(screwFront, 1); //向外
-	//d
-	//down
-	//d
-	runActionGroup(handRelease, 1); 
-	//d
-	//up
-	//d
+	delay_ms(10);
+	moto_Action(down, 9, 8900);
+	runActionGroup(handRelease,1);
+	delay_ms(300);
+	moto_Action(up, 9, 8900);
+}
+
+void put_Down_Dep2(void){
+	runActionGroup(handRelease, 1);	
+	delay_ms(10);
+	//回转
+	runActionGroup(screwBack, 1);		//2700
+	delay_ms(2700);
+
+	//收盘
+	plateRotate(color_Index, 10);
+	moto_Action(down, 9, 1200);
+	runActionGroup(handGet ,1);
+	delay_ms(300);
+	moto_Action(up, 9, 1200);
 	
-}
-
-void put_Down_Dep(servoTypeEnum platePos){
-	runActionGroup(backOpen, 1);  //张开 向内
-	//d
-	runActionGroup(platePos, 1);
-	//d
-	//down
-	//d
-	runActionGroup(handGet, 1);
-	//d
-	//up
-	//d
 	runActionGroup(screwFront, 1); //向外
-	//d
-	//down
-	//d
-	runActionGroup(handRelease, 1); 
-	//d
-	//up
-	//d
+	delay_ms(10);
+	moto_Action(down, 9, 8900);
+	runActionGroup(handRelease,1);
+	delay_ms(300);
+	moto_Action(up, 9, 8900);
 }
-
 //plate relate to color_Index
-void servo_Action(servoAction actionNum, servoTypeEnum platePos)
+void servo_Action(servoAction actionNum)
 {
 	switch(actionNum){
 		case defaut:
@@ -269,32 +277,49 @@ void servo_Action(servoAction actionNum, servoTypeEnum platePos)
 			servoMvCalib();
 			break;
 		case getObj:
-			get_Obj(platePos);
+			get_Obj();
 			color_Index++;
 			break;			
 		case putRough:
-			put_Rough(platePos);
+			put_Rough();
 			color_Index--;
 			break;
 		case getRough:
-			get_Rough(platePos);
+			get_Rough();
 			color_Index++;
 			break;
-		case putUpDep:
-			put_Up_Dep(platePos);
+		case putDownDep1:
+			put_Down_Dep1();
 			color_Index--;
 			break;
-		case putDownDep:
-			put_Down_Dep(platePos);
+		case putDownDep2:
+			put_Down_Dep2();
 			color_Index--;
-			break;
-			//d
-			
+			break;		
 	}
-	//down
-	runActionGroup(actionNum, 1);
 }
+//			//放盘
+//			moto_Action(down, 9, 1200);
+//			runActionGroup(4,1);
+//			delay_ms(300);
+//			moto_Action(up, 9, 1200);
+//			//收盘
+//			moto_Action(up, 9, 1200);
+//			runActionGroup(4,1);
+//			delay_ms(300);
+//			moto_Action(down, 9, 1200);
 
+
+//		//放地
+//		moto_Action(down, 9, 8900);
+//		runActionGroup(4,1);
+//		delay_ms(300);
+//		moto_Action(up, 9, 8900);
+//		//拿地
+//		moto_Action(down, 9, 8500);
+//		runActionGroup(3,1);
+//		delay_ms(300);
+//		moto_Action(up, 9, 8700);
 /*===================步进电机dir初始化==========================*/
 void Moto_Init(u32 arr, u32 psc){
 	Moto_Dir_Init();
@@ -355,18 +380,18 @@ void MOTO_PWM_Init(u32 arr, u32 psc)
 	TIM_OCInitStructure.TIM_Pulse = 0;
 	TIM_OC1Init(MOTO_PWM_TIM, &TIM_OCInitStructure); 
  
-
 	TIM_OC1PreloadConfig(MOTO_PWM_TIM, TIM_OCPreload_Enable);  //使能TIM3在CCR2上的预装载寄存器
 	TIM_ARRPreloadConfig(MOTO_PWM_TIM, ENABLE);
 
-	
 	TIM_Cmd(MOTO_PWM_TIM, ENABLE);
 
 }
 
 //200pulse/round   
-void moto_Action(motoDirEnum dir, int8_t speed){
+void moto_Action(motoDirEnum dir, int8_t speed, u16 nms){
 	if(dir == down)  		MOTODIR = 0;
 	else 					MOTODIR = 1;
-	MOTOPWM = speed;	
+	MOTOPWM = speed;
+	delay_ms(nms);
+	MOTOPWM = 0;
 }

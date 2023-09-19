@@ -57,6 +57,6 @@ void INFRARED4_Init(void)
 
 u8 Infrared_Scan(void)
 {
-	u8 ourput = GPIO_ReadInputDataBit(INFRARED1_PORT,INFRARED1_PIN) | GPIO_ReadInputDataBit(INFRARED2_PORT,INFRARED2_PIN) <<1 | GPIO_ReadInputDataBit(INFRARED3_PORT,INFRARED3_PIN) <<2 | GPIO_ReadInputDataBit(INFRARED4_PORT,INFRARED4_PIN) <<3;
-	return ourput;
+	u8 output = GPIO_ReadInputDataBit(INFRARED1_PORT,INFRARED1_PIN) | GPIO_ReadInputDataBit(INFRARED2_PORT,INFRARED2_PIN) <<1 | GPIO_ReadInputDataBit(INFRARED3_PORT,INFRARED3_PIN) <<2 | GPIO_ReadInputDataBit(INFRARED4_PORT,INFRARED4_PIN) <<3;
+	return output;
 }

@@ -18,11 +18,11 @@ void Serial_SendArray(USART_TypeDef * channel, uint8_t *array, uint16_t length)
 
 int Serial_Receive_Data_LH(USART_TypeDef* UARTx, u8 *buffer, u8 buffer_size, u8 data_size, u8 *out_buffer, u16 header, u16 tail)
 {
+	USART_ClearITPendingBit(UARTx, USART_IT_RXNE);
 	static u8 buffer_itr = 0;
 	static u8 rx_state = 0;
 	static u8 prev_data = 0x00;
 	u8 data = USART_ReceiveData(UARTx);
-	USART_ClearITPendingBit(UARTx, USART_IT_RXNE);
 	
 	if(rx_state==0 && data == (header&0x00ff) && prev_data == (header>>8))
 	{
@@ -53,13 +53,13 @@ int Serial_Receive_Data_LH(USART_TypeDef* UARTx, u8 *buffer, u8 buffer_size, u8 
 				out_buffer[i] = buffer[i];
 			}
 		}
-		buffer_itr = 0;
-		rx_state = 0;
 		for(int i=0;i<buffer_size;i++)
 		{
 			buffer[i]=0x00;      //将存放数据数组清零
 		}
 		USART_ITConfig(UARTx,USART_IT_RXNE,ENABLE);
+		buffer_itr = 0;
+		rx_state = 0;
 		return 3-rx_state; //2->1, 3->0
 	}
 	prev_data  = data;
