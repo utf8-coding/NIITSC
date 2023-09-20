@@ -17,6 +17,7 @@
 #include "run.h"
 #include "buzzer.h"
 #include "serial.h"
+#include "encoder.h"
 
 /* Private functions ---------------------------------------------------------*/
 int main(void)
@@ -29,7 +30,8 @@ int main(void)
 	Motor_Init();
 	OLED_Init();
 	Control_Init();
-	
+	Encoder_Init_All();
+
 //	MPU_USART_Config();
 //	OPENMV_USART_Config();
 	QRCODE_UART_Config();

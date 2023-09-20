@@ -1,20 +1,27 @@
 #include "encoder.h"
 
-void Encoder_Init(void)
+void Encoder_Init_All(void){
+	Encoder1_Init();
+	Encoder2_Init();
+	Encoder3_Init();
+	Encoder4_Init();
+}
+void Encoder1_Init(void)
 {
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	RCC_APB1PeriphClockCmd(ENCODER1_TIM_CLK, ENABLE);
+	RCC_AHB1PeriphClockCmd(ENCODER1_PIN_CLK_1 | ENCODER1_PIN_CLK_2, ENABLE);
 	
 	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Fast_Speed;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-		
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource6, GPIO_AF_TIM3);    
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_TIM3);
+	GPIO_InitStructure.GPIO_Pin = ENCODER1_PIN_1 | ENCODER1_PIN_2;
+//	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;        
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Fast_Speed; 
+	GPIO_Init(ENCODER1_PORT_1, &GPIO_InitStructure);
+	GPIO_Init(ENCODER1_PORT_2, &GPIO_InitStructure);	
+	
+	GPIO_PinAFConfig(ENCODER1_PORT_1, ENCODER1_SOURCE_1, ENCODER1_AF);    
+	GPIO_PinAFConfig(ENCODER1_PORT_2, ENCODER1_SOURCE_2, ENCODER1_AF);
 	
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
 	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
@@ -22,26 +29,192 @@ void Encoder_Init(void)
 	TIM_TimeBaseInitStructure.TIM_Period = 65536 - 1;		//ARR
 	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//不分频
 	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;
-	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStructure);
-	
+	TIM_TimeBaseInit(ENCODER1_TIM, &TIM_TimeBaseInitStructure);
+
 	TIM_ICInitTypeDef TIM_ICInitStructure;
-	TIM_ICStructInit(&TIM_ICInitStructure);
-	TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
-	TIM_ICInitStructure.TIM_ICFilter = 0xF;
-	TIM_ICInit(TIM3, &TIM_ICInitStructure);
-	TIM_ICInitStructure.TIM_Channel = TIM_Channel_2;
-	TIM_ICInitStructure.TIM_ICFilter = 0xF;
+	TIM_ICStructInit(&TIM_ICInitStructure);   //每一项按照缺省值填入
+	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(TIM3, &TIM_ICInitStructure);
 	
-	TIM_EncoderInterfaceConfig(TIM3, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	TIM_EncoderInterfaceConfig(ENCODER1_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	
-	TIM_Cmd(TIM3, ENABLE);
+	TIM_Cmd(ENCODER1_TIM, ENABLE);
 }
 
-int16_t Encoder_Get(void)
+void Encoder2_Init(void)
 {
-	int16_t Temp;
-	Temp = TIM_GetCounter(TIM3);
-	TIM_SetCounter(TIM3, 0);
-	return Temp;
+	RCC_APB1PeriphClockCmd(ENCODER2_TIM_CLK, ENABLE);
+	RCC_AHB1PeriphClockCmd(ENCODER2_PIN_CLK_1 | ENCODER2_PIN_CLK_2, ENABLE);
+	
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Pin = ENCODER2_PIN_1 | ENCODER2_PIN_2;
+//	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;        
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Fast_Speed; 
+	GPIO_Init(ENCODER2_PORT_1, &GPIO_InitStructure);
+	GPIO_Init(ENCODER2_PORT_2, &GPIO_InitStructure);	
+	
+	GPIO_PinAFConfig(ENCODER2_PORT_1, ENCODER2_SOURCE_1, ENCODER2_AF);    
+	GPIO_PinAFConfig(ENCODER2_PORT_2, ENCODER2_SOURCE_2, ENCODER2_AF);
+	
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInitStructure.TIM_Period = 65536 - 1;		//ARR
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//不分频
+	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;
+	TIM_TimeBaseInit(ENCODER2_TIM, &TIM_TimeBaseInitStructure);
+
+	TIM_ICInitTypeDef TIM_ICInitStructure;
+	TIM_ICStructInit(&TIM_ICInitStructure);   //每一项按照缺省值填入
+	TIM_ICInitStructure.TIM_ICFilter = 0x10;
+	TIM_ICInit(TIM3, &TIM_ICInitStructure);
+	
+	TIM_EncoderInterfaceConfig(ENCODER2_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	
+	TIM_Cmd(ENCODER2_TIM, ENABLE);
+}
+
+void Encoder3_Init(void)
+{
+	RCC_APB2PeriphClockCmd(ENCODER3_TIM_CLK, ENABLE);
+	RCC_AHB1PeriphClockCmd(ENCODER3_PIN_CLK_1 | ENCODER3_PIN_CLK_2, ENABLE);
+	
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Pin = ENCODER3_PIN_1 | ENCODER3_PIN_2;
+//	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;        
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Fast_Speed; 
+	GPIO_Init(ENCODER3_PORT_1, &GPIO_InitStructure);
+	GPIO_Init(ENCODER3_PORT_2, &GPIO_InitStructure);	
+	
+	GPIO_PinAFConfig(ENCODER3_PORT_1, ENCODER3_SOURCE_1, ENCODER3_AF);    
+	GPIO_PinAFConfig(ENCODER3_PORT_2, ENCODER3_SOURCE_2, ENCODER3_AF);
+	
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInitStructure.TIM_Period = 65536 - 1;		//ARR
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//不分频
+	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;
+	TIM_TimeBaseInit(ENCODER3_TIM, &TIM_TimeBaseInitStructure);
+
+	TIM_ICInitTypeDef TIM_ICInitStructure;
+	TIM_ICStructInit(&TIM_ICInitStructure);   //每一项按照缺省值填入
+	TIM_ICInitStructure.TIM_ICFilter = 0x10;
+	TIM_ICInit(TIM3, &TIM_ICInitStructure);
+	
+	TIM_EncoderInterfaceConfig(ENCODER3_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	
+	TIM_Cmd(ENCODER3_TIM, ENABLE);
+}
+
+void Encoder4_Init(void)
+{
+	RCC_APB1PeriphClockCmd(ENCODER4_TIM_CLK, ENABLE);
+	RCC_AHB1PeriphClockCmd(ENCODER4_PIN_CLK_1 | ENCODER4_PIN_CLK_2, ENABLE);
+	
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Pin = ENCODER4_PIN_1 | ENCODER4_PIN_2;
+//	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;        
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Fast_Speed; 
+	GPIO_Init(ENCODER4_PORT_1, &GPIO_InitStructure);
+	GPIO_Init(ENCODER4_PORT_2, &GPIO_InitStructure);	
+	
+	GPIO_PinAFConfig(ENCODER4_PORT_1, ENCODER4_SOURCE_1, ENCODER4_AF);    
+	GPIO_PinAFConfig(ENCODER4_PORT_2, ENCODER4_SOURCE_2, ENCODER4_AF);
+	
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInitStructure.TIM_Period = 65536 - 1;		//ARR
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//不分频
+	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;
+	TIM_TimeBaseInit(ENCODER4_TIM, &TIM_TimeBaseInitStructure);
+
+	TIM_ICInitTypeDef TIM_ICInitStructure;
+	TIM_ICStructInit(&TIM_ICInitStructure);   //每一项按照缺省值填入
+	TIM_ICInitStructure.TIM_ICFilter = 0x10;
+	TIM_ICInit(TIM3, &TIM_ICInitStructure);
+	
+	TIM_EncoderInterfaceConfig(ENCODER4_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	
+	TIM_Cmd(ENCODER4_TIM, ENABLE);
+}
+/**************************************************************************
+函数功能：单位时间读取编码器计数
+入口参数：定时器
+返回  值：速度值
+**************************************************************************/
+int Read_Velocity(u8 TIMX)
+{
+    int Encoder_TIM;    
+   switch(TIMX)
+	 {
+		case 2:  Encoder_TIM= ENCODER1_CNT; 	Encoder_TIM=0; break;
+		case 5:  Encoder_TIM= ENCODER2_CNT; 	Encoder_TIM=0; break;	
+		case 1:  Encoder_TIM= ENCODER3_CNT;  	Encoder_TIM=0; break;
+		case 4:  Encoder_TIM= ENCODER4_CNT;  	Encoder_TIM=0; break;		 
+		default: Encoder_TIM=0;
+	 }
+		return Encoder_TIM;
+}
+/**************************************************************************
+函数功能：读取位置信息
+入口参数：定时器
+返回  值：位置值
+**************************************************************************/
+int Read_Position(u8 TIMX)
+{
+    int Encoder_TIM;    
+   switch(TIMX)
+	 {
+		case 2:  Encoder_TIM= ENCODER1_CNT;  break;
+		case 3:  Encoder_TIM= ENCODER2_CNT;  break;	
+		case 4:  Encoder_TIM= ENCODER3_CNT;  break;	
+		case 5:  Encoder_TIM= ENCODER4_CNT;  break;	
+		default: Encoder_TIM=0;
+	 }
+		return Encoder_TIM;
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void TIM2_IRQHandler(void)//中断处理函数为空，清除中断标志位后结束中断
+{ 		    		  			    
+ if(TIM_GetFlagStatus(TIM2,TIM_FLAG_Update)==SET)//溢出中断
+ {
+	 
+ } 
+ TIM_ClearITPendingBit(TIM2,TIM_IT_Update); //清除中断标志位 	  
+}
+
+void TIM1_IRQHandler(void)//中断处理函数为空，清除中断标志位后结束中断
+{ 		    		  			    
+ if(TIM_GetFlagStatus(TIM1,TIM_FLAG_Update)==SET)//溢出中断
+ {
+	 
+ } 
+ TIM_ClearITPendingBit(TIM1,TIM_IT_Update); //清除中断标志位 	
+}
+
+void TIM4_IRQHandler(void)//中断处理函数为空，清除中断标志位后结束中断
+{ 		    		  			    
+ if(TIM_GetFlagStatus(TIM4,TIM_FLAG_Update)==SET)//溢出中断
+ {
+	 
+ } 
+ TIM_ClearITPendingBit(TIM4,TIM_IT_Update); //清除中断标志位 	  
+}
+
+void TIM5_IRQHandler(void)//中断处理函数为空，清除中断标志位后结束中断
+{ 		    		  			    
+ if(TIM_GetFlagStatus(TIM5,TIM_FLAG_Update)==SET)//溢出中断
+ {
+	 
+ } 
+ TIM_ClearITPendingBit(TIM5,TIM_IT_Update); //清除中断标志位 	  
 }
