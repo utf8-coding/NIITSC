@@ -74,6 +74,16 @@
 #define ENCODER4_TIM_CLK       						   RCC_APB1Periph_TIM4	 // ENCODER4 GPIO¶Ë¿ÚÊ±ÖÓ
 
 /*==============================FUNCTION============================*/
+typedef enum{
+	encoder_Cnt_1,
+	encoder_Cnt_2,
+	encoder_Cnt_3,
+	encoder_Cnt_4,
+	encoder_Cnt_Num
+}Encoder_Cnt_Enum;
+extern u8 encoder_Count_Buff[encoder_Cnt_Num];
+
+void Encoder_Tim_config(void);
 
 void Encoder_Init_All(void);
 void Encoder1_Init(void);
@@ -81,6 +91,6 @@ void Encoder2_Init(void);
 void Encoder3_Init(void);	
 void Encoder4_Init(void);	
 int16_t Encoder_Get(void);
-int Read_Velocity(u8 TIMX);
-
+//int Read_Velocity(u8 TIMX);
+int Read_Velocity(TIM_TypeDef* TIMX);
 #endif
