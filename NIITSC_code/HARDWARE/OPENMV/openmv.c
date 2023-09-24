@@ -68,7 +68,7 @@ void USART2_IRQHandler()
 	}
 }
 
-void OpenMV_Data_Handle(void)
+void OpenMV_Data_Process(void)
 {
 //	//openMV mode:
 //	if (OMV_data[2] == 0)

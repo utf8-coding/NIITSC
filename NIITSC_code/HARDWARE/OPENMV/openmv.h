@@ -30,6 +30,6 @@ extern u8 mark1;
 void OPENMV_USART_Config(void);
 void OpenMV_Display_Specs(void);
 int OpenMV_Change_Mode(u8 mode);
-void OpenMV_Data_Handle(void);
+void OpenMV_Data_Process(void);
 
 #endif

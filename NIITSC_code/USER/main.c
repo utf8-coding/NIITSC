@@ -2,7 +2,6 @@
 #include "stm32f4xx.h"
 #include "delay.h"
 #include "oled.h"
-#include "mpu.h"
 #include "openmv.h"
 #include "servo.h"
 #include "qrcode.h"
@@ -32,7 +31,6 @@ int main(void)
 	Control_Init();
 	Encoder_Init_All();
 
-//	MPU_USART_Config();
 //	OPENMV_USART_Config();
 	QRCODE_UART_Config();
 	SCREEN_USART_Config();
@@ -66,7 +64,8 @@ int main(void)
 	
 	while (1)
 	{
-		OpenMV_Data_Handle();
+		OpenMV_Data_Process();
+		OPS_Data_Process();
 		if(!flag_ops_ready){
 			OLED_ShowString(1, 1, "OPS prep.");
 			continue;
@@ -74,14 +73,15 @@ int main(void)
 		Input_Disp_Loop();
 		if (flag_start)
 		{
-			//speed_limit = 80
+			Run();
+			
+//			speed_limit = 80
 //			Set_Control_Mode(coordinateMode);
 //			Go_Position_Test(-0.15, 1.5, 90);
 			
 //			Set_Control_Mode(velocityMode);
 //			Set_Speed(-0.2, 0, 0);
 //			Wheel_Run_Loop();
-			Run();
 		} else
 		{
 			Set_Speed_All(0, 0, 0, 0);
