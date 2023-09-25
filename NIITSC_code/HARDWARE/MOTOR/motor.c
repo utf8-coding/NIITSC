@@ -70,7 +70,6 @@ void TIM_PWM_Init(u32 arr , u32 psc)
 	GPIO_PinAFConfig(MOTORC_PWM_PORT, MOTORC_PWM_SOURCE, MOTORC_PWM_AF);
 	GPIO_PinAFConfig(MOTORD_PWM_PORT, MOTORD_PWM_SOURCE, MOTORD_PWM_AF);
 	
-	//GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
@@ -123,6 +122,21 @@ void TIM_PWM_Init(u32 arr , u32 psc)
 	TIM_Cmd(MOTORB_PWM_TIM, ENABLE);
 	TIM_Cmd(MOTORC_PWM_TIM, ENABLE);
 	TIM_Cmd(MOTORD_PWM_TIM, ENABLE);
+
+	RCC_AHB1PeriphClockCmd(MOTOT_12_ENA_CLK, ENABLE);
+	RCC_AHB1PeriphClockCmd(MOTOT_34_ENA_CLK, ENABLE);
+
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_2MHz;
+	
+	GPIO_InitStruct.GPIO_Pin = MOTOT_12_ENA_PIN;
+	GPIO_Init(MOTOT_12_ENA_PORT, &GPIO_InitStruct);
+	GPIO_InitStruct.GPIO_Pin = MOTOT_34_ENA_PIN;
+	GPIO_Init(MOTOT_34_ENA_PORT, &GPIO_InitStruct);
+	MOTOT_12_ENA = ENABLE;
+	MOTOT_34_ENA = ENABLE;
 }
 
 void Set_Speed_All(int8_t speedA,int8_t speedB,int8_t speedC,int8_t speedD)
@@ -137,26 +151,26 @@ void MotorA_SetSpeed(int8_t speed)
 {
 	if(speed>0)	    DIN2=1,			DIN1=0; //前进 
 	else           	DIN2=0,			DIN1=1; //后退
-	PWMD=abs((int)(speed*0.80));
+	PWMA=abs((int)(speed*0.80));
 }
 
 void MotorB_SetSpeed(int8_t speed)
 {
 	if(speed>0)	    CIN2=1,			CIN1=0; //前进 
 	else           	CIN2=0,			CIN1=1; //后退
-	PWMC=abs(speed);
+	PWMB=abs(speed);
 }
 
 void MotorC_SetSpeed(int8_t speed)
 {
 	if(speed>0)	    AIN2=1,			AIN1=0; //前进 
 	else           	AIN2=0,			AIN1=1; //后退
-	PWMA=abs((int)(speed*0.80));
+	PWMC=abs((int)(speed*0.80));
 }
 
 void MotorD_SetSpeed(int8_t speed)
 {
 	if(speed>0)	    BIN2=1,			BIN1=0; //前进 
 	else           	BIN2=0,			BIN1=1; //后退
-	PWMB=abs((int)(speed*0.80));
+	PWMD=abs((int)(speed*0.80));
 }

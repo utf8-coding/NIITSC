@@ -88,7 +88,7 @@ typedef enum{
 	encoder_Cnt_4,
 	encoder_Cnt_Num
 }Encoder_Cnt_Enum;
-extern u8 encoder_Count_Buff[encoder_Cnt_Num];
+extern int encoder_Count_Buff[encoder_Cnt_Num];
 
 void Encoder_Tim_Config(u16 arr, u16 psc);
 void Encoder_Init_All(void);

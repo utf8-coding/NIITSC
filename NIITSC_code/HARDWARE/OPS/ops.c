@@ -115,18 +115,18 @@ void OPS_Calibrate(float x, float y, float heading)
 	}new_value;
 	
 	new_value.value = x;
-	Serial_SendArray(UART5, update_x, 4);
-	Serial_SendArray(UART5, new_value.data, 4);
+	Serial_SendArray(OPS_UART, update_x, 4);
+	Serial_SendArray(OPS_UART, new_value.data, 4);
 	
 	delay_ms(10);
 	new_value.value = y;
-	Serial_SendArray(UART5, update_y, 4);
-	Serial_SendArray(UART5, new_value.data, 4);
+	Serial_SendArray(OPS_UART, update_y, 4);
+	Serial_SendArray(OPS_UART, new_value.data, 4);
 	
 	delay_ms(10);
 	new_value.value = -heading;
-	Serial_SendArray(UART5, update_j, 4);
-	Serial_SendArray(UART5, new_value.data, 4);
+	Serial_SendArray(OPS_UART, update_j, 4);
+	Serial_SendArray(OPS_UART, new_value.data, 4);
 }
 
 void OPS_Display_Specs(void)
