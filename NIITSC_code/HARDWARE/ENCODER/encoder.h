@@ -5,38 +5,38 @@
 #include "sys.h"
 
 /*==============================ENCODER1============================*/
-#define ENCODER1_CNT                                  (short)TIM2->CNT
+#define ENCODER1_CNT                                  (short)TIM5->CNT
 	
-#define ENCODER1_PIN_1           					   GPIO_Pin_15       		 // ENCODER1 引脚  
+#define ENCODER1_PIN_1           					   GPIO_Pin_0       		 // ENCODER1 引脚  
 #define ENCODER1_PORT_1          					   GPIOA                 // ENCODER1 GPIO端口 
-#define ENCODER1_SOURCE_1        					   GPIO_PinSource15       // ENCODER1 GPIO端口 
+#define ENCODER1_SOURCE_1        					   GPIO_PinSource0      // ENCODER1 GPIO端口 
 #define ENCODER1_PIN_CLK_1      					   RCC_AHB1Periph_GPIOA	 // ENCODER1 GPIO端口时钟
 
-#define ENCODER1_PIN_2          					   GPIO_Pin_3       		 // ENCODER1 引脚  
-#define ENCODER1_PORT_2          					   GPIOB                 // ENCODER1 GPIO端口  
-#define ENCODER1_SOURCE_2        					   GPIO_PinSource3       // ENCODER1 GPIO端口  
-#define ENCODER1_PIN_CLK_2     						   RCC_AHB1Periph_GPIOB	 // ENCODER1 GPIO端口时钟
+#define ENCODER1_PIN_2          					   GPIO_Pin_1       		 // ENCODER1 引脚  
+#define ENCODER1_PORT_2          					   GPIOA                 // ENCODER1 GPIO端口  
+#define ENCODER1_SOURCE_2        					   GPIO_PinSource1       // ENCODER1 GPIO端口  
+#define ENCODER1_PIN_CLK_2     						   RCC_AHB1Periph_GPIOA	 // ENCODER1 GPIO端口时钟
 						 
-#define ENCODER1_TIM           						   TIM2                  // ENCODER1 GPIO端口  
-#define ENCODER1_AF            						   GPIO_AF_TIM2
-#define ENCODER1_TIM_CLK       						   RCC_APB1Periph_TIM2	 // ENCODER1 GPIO端口时钟
+#define ENCODER1_TIM           						   TIM5                  // ENCODER1 GPIO端口  
+#define ENCODER1_AF            						   GPIO_AF_TIM5
+#define ENCODER1_TIM_CLK       						   RCC_APB1Periph_TIM5	 // ENCODER1 GPIO端口时钟
 
 /*==============================ENCODER2============================*/
-#define ENCODER2_CNT                                  (short)TIM5->CNT
+#define ENCODER2_CNT                                  (short)TIM2->CNT
 	
-#define ENCODER2_PIN_1           					   GPIO_Pin_0       		 // ENCODER2 引脚  
+#define ENCODER2_PIN_1           					   GPIO_Pin_15       		 // ENCODER2 引脚  
 #define ENCODER2_PORT_1          					   GPIOA                 // ENCODER2 GPIO端口 
-#define ENCODER2_SOURCE_1        					   GPIO_PinSource0      // ENCODER2 GPIO端口 
+#define ENCODER2_SOURCE_1        					   GPIO_PinSource15       // ENCODER2 GPIO端口 
 #define ENCODER2_PIN_CLK_1      					   RCC_AHB1Periph_GPIOA	 // ENCODER2 GPIO端口时钟
 
-#define ENCODER2_PIN_2          					   GPIO_Pin_1       		 // ENCODER2 引脚  
-#define ENCODER2_PORT_2          					   GPIOA                 // ENCODER2 GPIO端口  
-#define ENCODER2_SOURCE_2        					   GPIO_PinSource1       // ENCODER2 GPIO端口  
-#define ENCODER2_PIN_CLK_2     						   RCC_AHB1Periph_GPIOA	 // ENCODER2 GPIO端口时钟
+#define ENCODER2_PIN_2          					   GPIO_Pin_3       		 // ENCODER2 引脚  
+#define ENCODER2_PORT_2          					   GPIOB                 // ENCODER2 GPIO端口  
+#define ENCODER2_SOURCE_2        					   GPIO_PinSource3       // ENCODER2 GPIO端口  
+#define ENCODER2_PIN_CLK_2     						   RCC_AHB1Periph_GPIOB	 // ENCODER2 GPIO端口时钟
 						 
-#define ENCODER2_TIM           						   TIM5                  // ENCODER2 GPIO端口  
-#define ENCODER2_AF            						   GPIO_AF_TIM5
-#define ENCODER2_TIM_CLK       						   RCC_APB1Periph_TIM5	 // ENCODER2 GPIO端口时钟
+#define ENCODER2_TIM           						   TIM2                  // ENCODER2 GPIO端口  
+#define ENCODER2_AF            						   GPIO_AF_TIM2
+#define ENCODER2_TIM_CLK       						   RCC_APB1Periph_TIM2	 // ENCODER2 GPIO端口时钟
 
 /*==============================ENCODER3============================*/
 #define ENCODER3_CNT                                  (short)TIM1->CNT
@@ -74,7 +74,7 @@
 #define ENCODER4_TIM_CLK       						   RCC_APB1Periph_TIM4	 // ENCODER4 GPIO端口时钟
 
 /*==============================EXTERNAL ACCESS============================*/
-#define SPEED_ENC_RATIO 1 //编码器数值与速度比 in m/s
+#define SPEED_ENC_RATIO 	1 //编码器数值与速度比 in m/s
 #define Motor_A_Speed ENCODER2_CNT*SPEED_ENC_RATIO
 #define Motor_B_Speed ENCODER1_CNT*SPEED_ENC_RATIO
 #define Motor_C_Speed ENCODER3_CNT*SPEED_ENC_RATIO

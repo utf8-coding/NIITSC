@@ -151,7 +151,7 @@ void MotorA_SetSpeed(int8_t speed)
 {
 	if(speed>0)	    DIN2=1,			DIN1=0; //前进 
 	else           	DIN2=0,			DIN1=1; //后退
-	PWMA=abs((int)(speed*0.80));
+	PWMA=abs(speed);
 }
 
 void MotorB_SetSpeed(int8_t speed)
@@ -165,12 +165,12 @@ void MotorC_SetSpeed(int8_t speed)
 {
 	if(speed>0)	    AIN2=1,			AIN1=0; //前进 
 	else           	AIN2=0,			AIN1=1; //后退
-	PWMC=abs((int)(speed*0.80));
+	PWMC=abs(speed);
 }
 
 void MotorD_SetSpeed(int8_t speed)
 {
 	if(speed>0)	    BIN2=1,			BIN1=0; //前进 
 	else           	BIN2=0,			BIN1=1; //后退
-	PWMD=abs((int)(speed*0.80));
+	PWMD=abs(speed);
 }
