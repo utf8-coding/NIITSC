@@ -1,6 +1,7 @@
 #include "encoder.h"
+#include "oled.h"
 
-u8 encoder_Count_Buff[encoder_Cnt_Num] = {0};
+int encoder_Count_Buff[encoder_Cnt_Num] = {0};
 /*===================ENCODER Initialize====================*/
 
 void Encoder_Init_All(void){
@@ -8,6 +9,7 @@ void Encoder_Init_All(void){
 	Encoder2_Init();
 	Encoder3_Init();
 	Encoder4_Init();
+	Encoder_Tim_Config(1000, 8400); // 84MHz/8400/1000 = 10Hz
 }
 
 void Encoder1_Init(void)
@@ -170,17 +172,26 @@ void Encoder4_Init(void)
 
 int Read_Velocity(TIM_TypeDef* TIMX)
 {
+	int Encoder_TIM; 
 	if(TIMX == ENCODER1_TIM){
-		return  ENCODER1_CNT;		
+		Encoder_TIM = ENCODER1_CNT;
+		TIM2->CNT = 0;
+		return  Encoder_TIM;		
 	}
 	else if(TIMX == ENCODER2_TIM){
-		return  ENCODER2_CNT;	
+		Encoder_TIM = ENCODER2_CNT;
+		TIM5->CNT = 0;
+		return  Encoder_TIM;	
 	}
 	else if(TIMX == ENCODER3_TIM){
-		return  ENCODER3_CNT;	
+		Encoder_TIM = ENCODER3_CNT;
+		TIM1->CNT = 0;
+		return  Encoder_TIM;	
 	}
 	else if(TIMX == ENCODER4_TIM){
-		return  ENCODER4_CNT;	
+		Encoder_TIM = ENCODER4_CNT;
+		TIM4->CNT = 0;
+		return  Encoder_TIM;	
 	}
 	else{
 		return 0;
@@ -245,6 +256,10 @@ void TIM7_IRQHandler(void){
 		encoder_Count_Buff[encoder_Cnt_2] = Read_Velocity(ENCODER2_TIM);
 		encoder_Count_Buff[encoder_Cnt_3] = Read_Velocity(ENCODER3_TIM);
 		encoder_Count_Buff[encoder_Cnt_4] = Read_Velocity(ENCODER4_TIM);
+		OLED_ShowSignedNum(1, 1, encoder_Count_Buff[encoder_Cnt_1], 8);
+		OLED_ShowSignedNum(2, 1, encoder_Count_Buff[encoder_Cnt_2], 8);
+		OLED_ShowSignedNum(3, 1, encoder_Count_Buff[encoder_Cnt_3], 8);
+		OLED_ShowSignedNum(4, 1, encoder_Count_Buff[encoder_Cnt_4], 8);
 	}
 	TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
 }
