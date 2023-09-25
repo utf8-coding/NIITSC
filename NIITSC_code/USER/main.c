@@ -33,7 +33,7 @@ int main(void)
 	Encoder_Tim_Config(1000, 8400); // 84MHz/8400/1000 = 10Hz
 //	OPENMV_USART_Config();
 	QRCODE_UART_Config();
-	SCREEN_USART_Config();
+	Screen_Init();
 	SERVO_USART_Config();
 	Moto_Init(18 - 1, 8400 -1);
 	Laser_Init();
