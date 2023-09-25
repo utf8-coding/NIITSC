@@ -42,7 +42,7 @@ void Encoder1_Init(void)
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(ENCODER1_TIM, &TIM_ICInitStructure);
 	
-	TIM_EncoderInterfaceConfig(ENCODER1_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	TIM_EncoderInterfaceConfig(ENCODER1_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Falling, TIM_ICPolarity_Rising);
 	
 	TIM_Cmd(ENCODER1_TIM, ENABLE);
 }
@@ -77,7 +77,7 @@ void Encoder2_Init(void)
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(ENCODER2_TIM, &TIM_ICInitStructure);
 	
-	TIM_EncoderInterfaceConfig(ENCODER2_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	TIM_EncoderInterfaceConfig(ENCODER2_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Falling, TIM_ICPolarity_Rising);
 	
 	TIM_Cmd(ENCODER2_TIM, ENABLE);
 }
@@ -112,7 +112,7 @@ void Encoder3_Init(void)
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(ENCODER3_TIM, &TIM_ICInitStructure);
 	
-	TIM_EncoderInterfaceConfig(ENCODER3_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	TIM_EncoderInterfaceConfig(ENCODER3_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Falling, TIM_ICPolarity_Rising);
 	
 	TIM_Cmd(ENCODER3_TIM, ENABLE);
 }
@@ -175,12 +175,12 @@ int Read_Velocity(TIM_TypeDef* TIMX)
 	int Encoder_TIM; 
 	if(TIMX == ENCODER1_TIM){
 		Encoder_TIM = ENCODER1_CNT;
-		TIM2->CNT = 0;
-		return  Encoder_TIM;		
+		TIM5->CNT = 0;
+		return Encoder_TIM;		
 	}
 	else if(TIMX == ENCODER2_TIM){
 		Encoder_TIM = ENCODER2_CNT;
-		TIM5->CNT = 0;
+		TIM2->CNT = 0;
 		return  Encoder_TIM;	
 	}
 	else if(TIMX == ENCODER3_TIM){
