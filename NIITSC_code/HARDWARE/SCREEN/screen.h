@@ -23,7 +23,9 @@
 #define SCREEN_USART_IRQn                       USART6_IRQn
 
 
-void SCREEN_USART_Config(void);
+void Screen_Init(void);
+void Screen_Clear(void);
+void Screen_Disp_Mission(u8 *qr_buff);
 
 
 #endif

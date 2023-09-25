@@ -1,7 +1,27 @@
 #include "screen.h"
+#include "serial.h"
+#include "delay.h"
 
+void Screen_USART_Config(void);
 
-void SCREEN_USART_Config(void) 
+//Note these are blocking func. 以下都是是阻塞函数
+void Screen_Init(){
+	Screen_USART_Config();
+	
+	unsigned char starter[9] = "CLR(0);";
+	starter[7] = 0x0d;
+	starter[8] = 0x0a;
+	Serial_SendArray(USART6, &starter[0], 9);
+	delay_ms(100);
+	
+	unsigned char starter2[9] = "DIR(1);";
+	starter2[7] = 0x0d;
+	starter2[8] = 0x0a;
+	Serial_SendArray(USART6, &starter2[0], 9);
+	delay_ms(100);
+}
+
+void Screen_USART_Config(void) 
 {
     GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
@@ -41,4 +61,27 @@ void SCREEN_USART_Config(void)
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority  = 2;
     NVIC_Init(&NVIC_InitStructure);
+}
+
+void Screen_Disp_Mission(u8 *qr_buff){
+	unsigned char starter[26] = "DC32(10,10,'321+123',1);";
+	starter[12] = qr_buff[0];
+	starter[13] = qr_buff[1];
+	starter[14] = qr_buff[2];
+	starter[15] = qr_buff[3];
+	starter[16] = qr_buff[4];
+	starter[17] = qr_buff[5];
+	starter[18] = qr_buff[6];
+	starter[24] = 0x0d;
+	starter[25] = 0x0a;
+	Serial_SendArray(USART6, &starter[0], 26);
+	delay_ms(100);
+}
+
+void Screen_Clear(void){
+	unsigned char starter[9] = "CLR(0);";
+	starter[7] = 0x0d;
+	starter[8] = 0x0a;
+	Serial_SendArray(USART6, &starter[0], 9);
+	delay_ms(100);
 }

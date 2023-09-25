@@ -87,18 +87,7 @@ void qr_Run3(void)
 	else if (QR_Ready() == qrRight)
 	{
 		Set_Control_Mode(stop);
-		unsigned char starter[26] = "DC32(10,10,'321+123',1);";
-		starter[12] = qr_buff[0];
-		starter[13] = qr_buff[1];
-		starter[14] = qr_buff[2];
-		starter[15] = qr_buff[3];
-		starter[16] = qr_buff[4];
-		starter[17] = qr_buff[5];
-		starter[18] = qr_buff[6];
-		starter[24] = 0x0d;
-		starter[25] = 0x0a;
-		Serial_SendArray(USART6, &starter[0], 26);
-		delay_ms(100);
+		
 		qr_Run_State = 4; //½øÏÂÒ»½×¶Î
 	}
 	else if (QR_Ready() == scanning && OPS_y > 1.8f)

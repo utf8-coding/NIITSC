@@ -133,8 +133,9 @@ void OPS_Display_Specs(void)
 {
 	OLED_ShowString(1, 1, "OPS:");
 	OLED_ShowSignedNum(2, 1, (int)OPS_heading+OPS_ring*360, 14);
-	OLED_ShowSignedNum(3, 1, (int)(OPS_x*100), 12); //cm here
-	OLED_ShowSignedNum(4, 1, (int)(OPS_y*100), 12);
+	OLED_ShowSignedNum(3, 1, (int)(OPS_x*100), 7); 
+	OLED_ShowSignedNum(3, 8, (int)(OPS_y*100), 7); //cm here
+	OLED_ShowString(4, 1, "Reset~");
 }
 
 

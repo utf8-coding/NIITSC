@@ -117,6 +117,11 @@ static void p0_r1(int d)
 		 flag_start = 0;
 	}
 }
+
+static void p1_r4(int d)
+{
+	OPS_Calibrate(0, 0, 0); //see if this works.
+}
 	
 	
 /*
@@ -136,7 +141,7 @@ static void page_logic(int page, int pressed_key)
 				do_nothing(0);
 				break;
 			case 1://1?
-				do_nothing(0);
+				row_logic(row, pressed_key, do_nothing, do_nothing, do_nothing, p1_r4);
 				break;
 			case 2://1?
 				do_nothing(0);
@@ -214,17 +219,24 @@ static int key_logic_process(int pressed_key)
 */
 void KEY_Init()
 { 
+	//c4 f11 f15 g1 e8 e13
 	GPIO_InitTypeDef GPIO_InitStructure;
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
-	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_12|GPIO_Pin_11|GPIO_Pin_10;        
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOF | RCC_AHB1Periph_GPIOG,ENABLE); 
+	
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;   
+	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_1;  
+	GPIO_Init(GPIOG, &GPIO_InitStructure);	
+	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_8|GPIO_Pin_13;    
 	GPIO_Init(GPIOE, &GPIO_InitStructure);						 
 	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13;
+	
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOE, &GPIO_InitStructure);		
+	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_4;     
+	GPIO_Init(GPIOC, &GPIO_InitStructure);	     
+	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_11|GPIO_Pin_15;   
+	GPIO_Init(GPIOF, &GPIO_InitStructure);
 }
 
 /*
@@ -304,4 +316,5 @@ void Input_Disp_Loop(void)
 
 void System_Test(int d)
 {
+	
 }
