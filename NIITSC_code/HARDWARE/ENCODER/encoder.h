@@ -73,6 +73,13 @@
 #define ENCODER4_AF            						   GPIO_AF_TIM4
 #define ENCODER4_TIM_CLK       						   RCC_APB1Periph_TIM4	 // ENCODER4 GPIO端口时钟
 
+/*==============================EXTERNAL ACCESS============================*/
+#define SPEED_ENC_RATIO 1 //编码器数值与速度比 in m/s
+#define Motor_A_Speed ENCODER2_CNT*SPEED_ENC_RATIO
+#define Motor_B_Speed ENCODER1_CNT*SPEED_ENC_RATIO
+#define Motor_C_Speed ENCODER3_CNT*SPEED_ENC_RATIO
+#define Motor_D_Speed ENCODER4_CNT*SPEED_ENC_RATIO
+
 /*==============================FUNCTION============================*/
 typedef enum{
 	encoder_Cnt_1,
