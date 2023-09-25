@@ -38,7 +38,7 @@ void Encoder1_Init(void)
 	TIM_ICInitTypeDef TIM_ICInitStructure;
 	TIM_ICStructInit(&TIM_ICInitStructure);   //每一项按照缺省值填入
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
-	TIM_ICInit(TIM3, &TIM_ICInitStructure);
+	TIM_ICInit(ENCODER1_TIM, &TIM_ICInitStructure);
 	
 	TIM_EncoderInterfaceConfig(ENCODER1_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	
@@ -73,7 +73,7 @@ void Encoder2_Init(void)
 	TIM_ICInitTypeDef TIM_ICInitStructure;
 	TIM_ICStructInit(&TIM_ICInitStructure);   //每一项按照缺省值填入
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
-	TIM_ICInit(TIM3, &TIM_ICInitStructure);
+	TIM_ICInit(ENCODER2_TIM, &TIM_ICInitStructure);
 	
 	TIM_EncoderInterfaceConfig(ENCODER2_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	
@@ -108,7 +108,7 @@ void Encoder3_Init(void)
 	TIM_ICInitTypeDef TIM_ICInitStructure;
 	TIM_ICStructInit(&TIM_ICInitStructure);   //每一项按照缺省值填入
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
-	TIM_ICInit(TIM3, &TIM_ICInitStructure);
+	TIM_ICInit(ENCODER3_TIM, &TIM_ICInitStructure);
 	
 	TIM_EncoderInterfaceConfig(ENCODER3_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	
@@ -143,7 +143,7 @@ void Encoder4_Init(void)
 	TIM_ICInitTypeDef TIM_ICInitStructure;
 	TIM_ICStructInit(&TIM_ICInitStructure);   //每一项按照缺省值填入
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
-	TIM_ICInit(TIM3, &TIM_ICInitStructure);
+	TIM_ICInit(ENCODER4_TIM, &TIM_ICInitStructure);
 	
 	TIM_EncoderInterfaceConfig(ENCODER4_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	

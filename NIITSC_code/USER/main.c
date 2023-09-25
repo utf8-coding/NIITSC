@@ -30,7 +30,7 @@ int main(void)
 	OLED_Init();
 	Control_Init();
 	Encoder_Init_All();
-
+	Encoder_Tim_Config(1000, 8400); // 84MHz/8400/1000 = 10Hz
 //	OPENMV_USART_Config();
 	QRCODE_UART_Config();
 	SCREEN_USART_Config();
