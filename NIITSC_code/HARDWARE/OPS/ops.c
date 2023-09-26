@@ -16,8 +16,8 @@ void OPS_DMA_Init(void);
 
 void OPS_Init(void)
 {
-	OPS_DMA_Init();
 	OPS_USART_Config();
+	OPS_DMA_Init();
 }
 
 void OPS_USART_Config(void) 
@@ -28,7 +28,7 @@ void OPS_USART_Config(void)
 	
 	RCC_AHB1PeriphClockCmd(OPS_UART_TX_CLK
 						| OPS_UART_RX_CLK, ENABLE); //GPIO_CLK enable
-	RCC_APB1PeriphClockCmd(OPS_UART_CLK, ENABLE);	//UART_CLK enable
+	RCC_APB2PeriphClockCmd(OPS_UART_CLK, ENABLE);	//UART_CLK enable
 	
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -133,8 +133,8 @@ void OPS_Display_Specs(void)
 {
 	OLED_ShowString(1, 1, "OPS:");
 	OLED_ShowSignedNum(2, 1, (int)OPS_heading+OPS_ring*360, 14);
-	OLED_ShowSignedNum(3, 1, (int)(OPS_x*100), 7); 
-	OLED_ShowSignedNum(3, 8, (int)(OPS_y*100), 7); //cm here
+	OLED_ShowSignedNum(3, 1, (int)(OPS_x*100), 6); 
+	OLED_ShowSignedNum(3, 9, (int)(OPS_y*100), 6); //cm here
 	OLED_ShowString(4, 1, "Reset~");
 }
 
@@ -155,7 +155,7 @@ void OPS_DMA_Init(){
   /* 配置 DMA Stream */
   DMA_InitStructure.DMA_Channel = OPS_DMA_Channel;                           //通道选择
   DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)&USART1->DR;             //DMA外设地址
-  DMA_InitStructure.DMA_Memory0BaseAddr = OPS_data.data[2];                  //DMA 存储器0地址
+  DMA_InitStructure.DMA_Memory0BaseAddr = (u32)&OPS_data.data[2];                  //DMA 存储器0地址
   DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;                    //外设到储存器
   DMA_InitStructure.DMA_BufferSize = OPS_DMA_Buf_Size;               			   //数据传输量 
   DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;           //外设非增量模式
@@ -186,27 +186,31 @@ void OPS_DMA_Enable(void){
 }
 */
 
+
 void USART1_IRQHandler(void) 
 {
   u8 data = 0;
   static u8 frame_alignment_state = 0; //0:未对齐 1:第一包帧头 2:第二包帧头
-    
+	//HW BUG handle
+	if(USART_GetITStatus(USART1, USART_IT_PE) == SET)
+	{//Parity Error interrupt
+		USART_ClearFlag(USART1, USART_FLAG_PE);
+	}
+	
 	if (USART_GetITStatus(USART1, USART_IT_RXNE) == SET) 
 	{
 		//Frame alignment on start up. 开机对帧操作：
 		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
 		data = USART_ReceiveData(USART1);
-		
 		if(frame_alignment_state==1 && data==0x0d)                          
 		{
 			//对帧成功，串口中断关闭，DMA启动
-			USART_ITConfig(USART1, USART_IT_RXNE,DISABLE);  
-			
 			USART_DMACmd(USART1,USART_DMAReq_Rx,ENABLE);    
 			DMA_Cmd(OPS_DMA_Stream, ENABLE);                                 
 	
-			flag_DMA_running = 1;
-			frame_alignment_state = 0;                 
+			flag_DMA_running = 1;  
+			frame_alignment_state = 0;  
+			USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);       
 		}
 		else if(data == 0x0a) {
 			frame_alignment_state = 1;
@@ -217,37 +221,40 @@ void USART1_IRQHandler(void)
 
 //Need to be placed in main loop
 void OPS_Data_Process(void){
-	if(OPS_data.data[2] != 0x0D || OPS_data.data[3] != 0x0A || OPS_data.data[28] != 0x0A || OPS_data.data[29] != 0x0D) {
-		//重新对帧：
-		USART_ITConfig(USART1, USART_IT_RXNE,ENABLE);
-		USART_DMACmd(USART1,USART_DMAReq_Rx,DISABLE);
-		DMA_Cmd(OPS_DMA_Stream, DISABLE);                       
-		OLED_Clear();
-		OLED_ShowString(1,1,"OPS FRM ERR");
-	} else {
-		//转圈处理
-		static u8 ring_lock = 0;
-		if (OPS_heading > 170 && -OPS_data.ActVal[1] < -170 && !ring_lock){
-			OPS_ring += 1;
-			ring_lock = 1;
-		}
-		else if (OPS_heading < -170 && -OPS_data.ActVal[1] > 170 && !ring_lock){
-			OPS_ring -= 1;
-			ring_lock = 1;
-		}
-		else if (OPS_heading >= -170 && OPS_heading <= 170){
-			ring_lock = 0;
-		}
-		//位置数据
-		OPS_heading = -OPS_data.ActVal[1];//degree
-		OPS_x = OPS_data.ActVal[4]/1000;
-		OPS_y = OPS_data.ActVal[5]/1000; //m
-		//OPS启动校准检测
-		if(OPS_heading+OPS_x+OPS_y != 0 && !flag_ops_ready){
-			flag_ops_ready = 1;
+	if(flag_DMA_running)
+	{
+		if(OPS_data.data[2] != 0x0D || OPS_data.data[3] != 0x0A) {
+			//重新对帧：
+			USART_DMACmd(USART1,USART_DMAReq_Rx,DISABLE);
+			DMA_Cmd(OPS_DMA_Stream, DISABLE);                       
+			OLED_Clear();
+			OLED_ShowString(1,1,"OPS FRM ERR");
+			flag_DMA_running = 0;
+			USART_ITConfig(USART1, USART_IT_RXNE,ENABLE);
+		} else {
+			//转圈处理
+			static u8 ring_lock = 0;
+			if (OPS_heading > 170 && -OPS_data.ActVal[1] < -170 && !ring_lock){
+				OPS_ring += 1;
+				ring_lock = 1;
+			}
+			else if (OPS_heading < -170 && -OPS_data.ActVal[1] > 170 && !ring_lock){
+				OPS_ring -= 1;
+				ring_lock = 1;
+			}
+			else if (OPS_heading >= -170 && OPS_heading <= 170){
+				ring_lock = 0;
+			}
+			//位置数据
+			OPS_heading = -OPS_data.ActVal[1];//degree
+			OPS_x = OPS_data.ActVal[4]/1000;
+			OPS_y = OPS_data.ActVal[5]/1000; //m
+			//OPS启动校准检测
+			if(OPS_heading+OPS_x+OPS_y != 0 && !flag_ops_ready){
+				flag_ops_ready = 1;
+			}
 		}
 	}
-	
 	//好像是发送相关，不懂。暂时不用DMA做发送
 	/*	
 		if(DMA_GetFlagStatus(DMA2_Stream5,DMA_FLAG_TCIF7)!=RESET)//??DMA2_Steam7????
@@ -258,3 +265,4 @@ void OPS_Data_Process(void){
 		MYDMA_Enable(DMA2_Stream7,38); //WHY？ 
 	*/
 }
+	

@@ -9,6 +9,7 @@
 #include "control.h"
 #include "serial.h"
 #include "infrared.h "
+#include "encoder.h"
 
 static int min_page = -1, max_page = 3, min_var_page = 0, max_var_page = 3;
 int flag_varmod = 0;
@@ -292,6 +293,7 @@ void Input_Disp_Loop(void)
 				OLED_ShowString(4, 14, "p2");
 				break;
 			case 3:
+				Encoder_Display_Spects();
 				OLED_ShowString(4, 14, "p3");
 				break;
 		}
@@ -316,5 +318,21 @@ void Input_Disp_Loop(void)
 
 void System_Test(int d)
 {
-	
+	Set_Pwm_All(50, 0, 0, 0);
+	delay_ms(1000);
+	Set_Pwm_All(-50, 0, 0, 0);
+	delay_ms(1000);
+	Set_Pwm_All(0, 50, 0, 0);
+	delay_ms(1000);
+	Set_Pwm_All(0, -50, 0, 0);
+	delay_ms(1000);
+	Set_Pwm_All(0, 0, 50, 0);
+	delay_ms(1000);
+	Set_Pwm_All(0, 0, -50, 0);
+	delay_ms(1000);
+	Set_Pwm_All(0, 0, 0, 50);
+	delay_ms(1000);
+	Set_Pwm_All(0, 0, 0, -50);
+	delay_ms(1000);
+	Set_Pwm_All(0, 0, 0, 0);
 }

@@ -139,38 +139,38 @@ void TIM_PWM_Init(u32 arr , u32 psc)
 	MOTOT_34_ENA = ENABLE;
 }
 
-void Set_Speed_All(int8_t speedA,int8_t speedB,int8_t speedC,int8_t speedD)
+void Set_Pwm_All(int8_t pwmA,int8_t pwmB,int8_t pwmC,int8_t pwmD)
 {
-	MotorA_SetSpeed(speedA);
-	MotorB_SetSpeed(speedB);	
-	MotorC_SetSpeed(speedC);
-	MotorD_SetSpeed(speedD);
+	MotorA_SetPwm(pwmA);
+	MotorB_SetPwm(pwmB);	
+	MotorC_SetPwm(pwmC);
+	MotorD_SetPwm(pwmD);
 }
 
-void MotorA_SetSpeed(int8_t speed)
+void MotorA_SetPwm(int8_t pwm)
 {
-	if(speed>0)	    DIN2=1,			DIN1=0; //前进 
+	if(pwm>0)	    DIN2=1,			DIN1=0; //前进 
 	else           	DIN2=0,			DIN1=1; //后退
-	PWMA=abs(speed);
-}
+	PWMA=abs(pwm);
+} 
 
-void MotorB_SetSpeed(int8_t speed)
+void MotorB_SetPwm(int8_t pwm)
 {
-	if(speed>0)	    CIN2=1,			CIN1=0; //前进 
+	if(pwm>0)	    CIN2=1,			CIN1=0; //前进 
 	else           	CIN2=0,			CIN1=1; //后退
-	PWMB=abs(speed);
+	PWMB=abs(pwm);
 }
 
-void MotorC_SetSpeed(int8_t speed)
+void MotorC_SetPwm(int8_t pwm)
 {
-	if(speed>0)	    AIN2=1,			AIN1=0; //前进 
-	else           	AIN2=0,			AIN1=1; //后退
-	PWMC=abs(speed);
-}
-
-void MotorD_SetSpeed(int8_t speed)
-{
-	if(speed>0)	    BIN2=1,			BIN1=0; //前进 
+	if(pwm>0)	    BIN2=1,			BIN1=0; //前进 
 	else           	BIN2=0,			BIN1=1; //后退
-	PWMD=abs(speed);
+	PWMC=abs(pwm);
+}
+
+void MotorD_SetPwm(int8_t pwm)
+{
+	if(pwm>0)	    AIN2=1,			AIN1=0; //前进 
+	else           	AIN2=0,			AIN1=1; //后退
+	PWMD=abs(pwm);
 }

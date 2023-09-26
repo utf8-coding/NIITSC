@@ -73,14 +73,6 @@
 #define ENCODER4_AF            						   GPIO_AF_TIM4
 #define ENCODER4_TIM_CLK       						   RCC_APB1Periph_TIM4	 // ENCODER4 GPIO端口时钟
 
-/*==============================EXTERNAL ACCESS============================*/
-#define SPEED_ENC_RATIO 746 //编码器数值与速度比 in m/s
-#define Motor_A_Speed ENCODER2_CNT/SPEED_ENC_RATIO
-#define Motor_B_Speed ENCODER1_CNT/SPEED_ENC_RATIO
-#define Motor_C_Speed ENCODER3_CNT/SPEED_ENC_RATIO
-#define Motor_D_Speed ENCODER4_CNT/SPEED_ENC_RATIO
-
-/*==============================FUNCTION============================*/
 typedef enum{
 	encoder_Cnt_1,
 	encoder_Cnt_2,
@@ -88,15 +80,16 @@ typedef enum{
 	encoder_Cnt_4,
 	encoder_Cnt_Num
 }Encoder_Cnt_Enum;
-extern int encoder_Count_Buff[encoder_Cnt_Num];
 
-void Encoder_Tim_Config(u16 arr, u16 psc);
+/*==============================EXTERNAL ACCESS============================*/
+extern int encoder_Count_Buff[encoder_Cnt_Num];
+#define SPEED_ENC_RATIO 746 //编码器数值与速度比 in m/s
+#define Motor_A_Speed encoder_Count_Buff[encoder_Cnt_2]/SPEED_ENC_RATIO
+#define Motor_B_Speed encoder_Count_Buff[encoder_Cnt_1]/SPEED_ENC_RATIO
+#define Motor_C_Speed encoder_Count_Buff[encoder_Cnt_3]/SPEED_ENC_RATIO
+#define Motor_D_Speed encoder_Count_Buff[encoder_Cnt_4]/SPEED_ENC_RATIO
+
+/*==============================FUNCTION============================*/
 void Encoder_Init_All(void);
-void Encoder1_Init(void);
-void Encoder2_Init(void);
-void Encoder3_Init(void);	
-void Encoder4_Init(void);	
-int16_t Encoder_Get(void);
-//int Read_Velocity(u8 TIMX);
-int Read_Velocity(TIM_TypeDef* TIMX);
+void Encoder_Display_Spects(void);
 #endif

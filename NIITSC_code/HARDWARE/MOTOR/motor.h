@@ -15,10 +15,10 @@
 #define DIN1   PGout(8)  
 #define DIN2   PGout(7)  
 
-#define PWMA   TIM3->CCR1
-#define PWMB   TIM3->CCR2
-#define PWMC   TIM3->CCR3
-#define PWMD   TIM3->CCR4
+#define PWMA   TIM3->CCR4
+#define PWMB   TIM3->CCR3
+#define PWMC   TIM3->CCR2
+#define PWMD   TIM3->CCR1
 
 #define MOTOT_12_ENA 			    PGout(11) 
 #define MOTOT_12_ENA_PIN			GPIO_Pin_11
@@ -108,11 +108,11 @@
 /*-----------------------------------------------------*/
 void Motor_Init(void);
 
-void MotorA_SetSpeed(int8_t Speed);
-void MotorB_SetSpeed(int8_t Speed);
-void MotorC_SetSpeed(int8_t Speed);
-void MotorD_SetSpeed(int8_t Speed);
+void MotorA_SetPwm(int8_t Speed);
+void MotorB_SetPwm(int8_t Speed);
+void MotorC_SetPwm(int8_t Speed);
+void MotorD_SetPwm(int8_t Speed);
 
-void Set_Speed_All(int8_t speedA,int8_t speedB,int8_t speedC,int8_t speedD);
+void Set_Pwm_All(int8_t speedA,int8_t speedB,int8_t speedC,int8_t speedD);
 
 #endif

@@ -1,6 +1,15 @@
 #include "encoder.h"
 #include "oled.h"
 
+//NOTE: Max enc speed is around 500
+
+void Encoder1_Init(void);
+void Encoder2_Init(void);
+void Encoder3_Init(void);
+void Encoder4_Init(void);
+void Encoder_Tim_Config(u16 arr, u16 psc);
+
+
 int encoder_Count_Buff[encoder_Cnt_Num] = {0};
 /*===================ENCODER Initialize====================*/
 
@@ -42,7 +51,7 @@ void Encoder1_Init(void)
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(ENCODER1_TIM, &TIM_ICInitStructure);
 	
-	TIM_EncoderInterfaceConfig(ENCODER1_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Falling, TIM_ICPolarity_Rising);
+	TIM_EncoderInterfaceConfig(ENCODER1_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	
 	TIM_Cmd(ENCODER1_TIM, ENABLE);
 }
@@ -77,7 +86,7 @@ void Encoder2_Init(void)
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(ENCODER2_TIM, &TIM_ICInitStructure);
 	
-	TIM_EncoderInterfaceConfig(ENCODER2_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Falling, TIM_ICPolarity_Rising);
+	TIM_EncoderInterfaceConfig(ENCODER2_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	
 	TIM_Cmd(ENCODER2_TIM, ENABLE);
 }
@@ -112,7 +121,7 @@ void Encoder3_Init(void)
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(ENCODER3_TIM, &TIM_ICInitStructure);
 	
-	TIM_EncoderInterfaceConfig(ENCODER3_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Falling, TIM_ICPolarity_Rising);
+	TIM_EncoderInterfaceConfig(ENCODER3_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	
 	TIM_Cmd(ENCODER3_TIM, ENABLE);
 }
@@ -147,7 +156,7 @@ void Encoder4_Init(void)
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(ENCODER4_TIM, &TIM_ICInitStructure);
 	
-	TIM_EncoderInterfaceConfig(ENCODER4_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	TIM_EncoderInterfaceConfig(ENCODER4_TIM, TIM_EncoderMode_TI12, TIM_ICPolarity_Falling, TIM_ICPolarity_Rising);
 	
 	TIM_Cmd(ENCODER4_TIM, ENABLE);
 }
@@ -156,21 +165,7 @@ void Encoder4_Init(void)
 入口参数：定时器
 返回  值：速度值
 **************************************************************************/
-//int Read_Velocity( TIMX)
-//{
-//    int Encoder_TIM;    
-//   switch(TIMX)
-//	 {
-//		case 2:  Encoder_TIM= ENCODER1_CNT; 	Encoder_TIM=0; break;
-//		case 5:  Encoder_TIM= ENCODER2_CNT; 	Encoder_TIM=0; break;	
-//		case 1:  Encoder_TIM= ENCODER3_CNT;  	Encoder_TIM=0; break;
-//		case 4:  Encoder_TIM= ENCODER4_CNT;  	Encoder_TIM=0; break;		 
-//		default: Encoder_TIM=0;
-//	 }
-//		return Encoder_TIM;
-//}
-
-int Read_Velocity(TIM_TypeDef* TIMX)
+int read_Velocity(TIM_TypeDef* TIMX)
 {
 	int Encoder_TIM; 
 	if(TIMX == ENCODER1_TIM){
@@ -197,29 +192,9 @@ int Read_Velocity(TIM_TypeDef* TIMX)
 		return 0;
 	}
 }
-///**************************************************************************
-//函数功能：读取位置信息
-//入口参数：定时器
-//返回  值：位置值
-//**************************************************************************/
-//int Read_Position(u8 TIMX)
-//{
-//    int Encoder_TIM;    
-//   switch(TIMX)
-//	 {
-//		case 2:  Encoder_TIM= ENCODER1_CNT;  break;
-//		case 3:  Encoder_TIM= ENCODER2_CNT;  break;	
-//		case 4:  Encoder_TIM= ENCODER3_CNT;  break;	
-//		case 5:  Encoder_TIM= ENCODER4_CNT;  break;	
-//		default: Encoder_TIM=0;
-//	 }
-//		return Encoder_TIM;
-//}
-
 
 
 /*===================ENCODER+_TIM Initialize====================*/
-
 void Encoder_Tim_Config(u16 arr, u16 psc){
 	
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
@@ -252,52 +227,19 @@ void Encoder_Tim_Config(u16 arr, u16 psc){
 
 void TIM7_IRQHandler(void){
 	if(TIM_GetFlagStatus(TIM7, TIM_FLAG_Update) == SET){
-		encoder_Count_Buff[encoder_Cnt_1] = Read_Velocity(ENCODER1_TIM);
-		encoder_Count_Buff[encoder_Cnt_2] = Read_Velocity(ENCODER2_TIM);
-		encoder_Count_Buff[encoder_Cnt_3] = Read_Velocity(ENCODER3_TIM);
-		encoder_Count_Buff[encoder_Cnt_4] = Read_Velocity(ENCODER4_TIM);
-		OLED_ShowSignedNum(1, 1, encoder_Count_Buff[encoder_Cnt_1], 8);
-		OLED_ShowSignedNum(2, 1, encoder_Count_Buff[encoder_Cnt_2], 8);
-		OLED_ShowSignedNum(3, 1, encoder_Count_Buff[encoder_Cnt_3], 8);
-		OLED_ShowSignedNum(4, 1, encoder_Count_Buff[encoder_Cnt_4], 8);
+		encoder_Count_Buff[encoder_Cnt_1] = read_Velocity(ENCODER1_TIM);
+		encoder_Count_Buff[encoder_Cnt_2] = read_Velocity(ENCODER2_TIM);
+		encoder_Count_Buff[encoder_Cnt_3] = read_Velocity(ENCODER3_TIM);
+		encoder_Count_Buff[encoder_Cnt_4] = read_Velocity(ENCODER4_TIM);
 	}
 	TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-//void TIM2_IRQHandler(void)//中断处理函数为空，清除中断标志位后结束中断
-//{ 		    		  			    
-// if(TIM_GetFlagStatus(TIM2,TIM_FLAG_Update)==SET)//溢出中断
-// {
-//	 
-// } 
-// TIM_ClearITPendingBit(TIM2,TIM_IT_Update); //清除中断标志位 	  
-//}
-
-//void TIM1_IRQHandler(void)//中断处理函数为空，清除中断标志位后结束中断
-//{ 		    		  			    
-// if(TIM_GetFlagStatus(TIM1,TIM_FLAG_Update)==SET)//溢出中断
-// {
-//	 
-// } 
-// TIM_ClearITPendingBit(TIM1,TIM_IT_Update); //清除中断标志位 	
-//}
-
-//void TIM4_IRQHandler(void)//中断处理函数为空，清除中断标志位后结束中断
-//{ 		    		  			    
-// if(TIM_GetFlagStatus(TIM4,TIM_FLAG_Update)==SET)//溢出中断
-// {
-//	 
-// } 
-// TIM_ClearITPendingBit(TIM4,TIM_IT_Update); //清除中断标志位 	  
-//}
-
-//void TIM5_IRQHandler(void)//中断处理函数为空，清除中断标志位后结束中断
-//{ 		    		  			    
-// if(TIM_GetFlagStatus(TIM5,TIM_FLAG_Update)==SET)//溢出中断
-// {
-//	 
-// } 
-// TIM_ClearITPendingBit(TIM5,TIM_IT_Update); //清除中断标志位 	  
-//}
+void Encoder_Display_Spects(void)
+{
+	OLED_ShowString(1, 1, "Enc:");
+	OLED_ShowSignedNum(2, 1, encoder_Count_Buff[encoder_Cnt_2], 3);
+	OLED_ShowSignedNum(2, 6, encoder_Count_Buff[encoder_Cnt_1], 3);
+	OLED_ShowSignedNum(3, 1, encoder_Count_Buff[encoder_Cnt_3], 3);
+	OLED_ShowSignedNum(3, 6, encoder_Count_Buff[encoder_Cnt_4], 3);
+}
