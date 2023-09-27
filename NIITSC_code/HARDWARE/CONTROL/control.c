@@ -16,16 +16,16 @@
 void clear_state_stop(void);
 
 //==================== Public vars =====================:
-float speed_limit = 0.5, angular_speed_limit = 0.1; //speed lmit should be smaller than 0.8 m/s
+float speed_limit = 0.15, angular_speed_limit = 0.7; //speed lmit should be smaller than 0.8 m/s
 
 //==================== Internal vars =====================:
 //constants & PIDs
 PID x_pid, y_pid, heading_pid, openmv_x_PID, openmv_y_PID, motorA_PID, motorB_PID, motorC_PID, motorD_PID;
 const float H = 0.188, W = 0.25, R = 0.413, PI = 3.1415926535;
-const float xy_kp = 0.80,	 	xy_ki = 0.05, 			xy_kd = 0, 			xy_ki_limit = 0.1,
-			heading_kp = 0.07, 	heading_ki = 0.001, 	heading_kd = 0, 	heading_ki_limit = 0.1,
+const float xy_kp = 0.75,	 	xy_ki = 0.010, 			xy_kd = 0.1, 			xy_ki_limit = 0.05,
+			heading_kp = 0.50, 	heading_ki = 0.004, 	heading_kd = 0.05, 	heading_ki_limit = 0.5,
 			//motor speed unit is m/s, should start from a small value
-			motor_kp = 2, 	motor_ki = 0.015, 		motor_kd = 0, 		motor_ki_limit = 0.5, 
+			motor_kp = 1.8, 	motor_ki = 0.018, 		motor_kd = 0.01, 		motor_ki_limit = 0.05, 
 			mv_kp = 0.008, 		mv_ki = 0.0005, 		mv_kd = 0, 			mv_ki_limit = 0.1;
 const float openmv_correction_threshold = 5;
 
@@ -156,7 +156,7 @@ void check_stable(void)
 //Only available for coordinateMode.
 void check_arrive(void)
 {
-	if(fabs(x_pid.error) < 0.025 && fabs(y_pid.error) < 0.025 && fabs(heading_pid.error) < 1.5)
+	if(fabs(x_pid.error) < 0.025 && fabs(y_pid.error) < 0.025 && fabs(heading_pid.error) < 2)
 			flag_arrive = 1;
 		else
 			flag_arrive = 0;
@@ -191,7 +191,7 @@ void target_to_abs_speed(void)
 
 	absVx = x_pid.output;
 	absVy = y_pid.output;
-	w = heading_pid.output*R*PI/180;
+	w = heading_pid.output/4; //parameter by experience
 }
 
 //Using global var{absVx, absVy}, setting var{relVx, relVy}:
@@ -234,7 +234,7 @@ void Control_Init(void)
 {
 	set_pid(&x_pid, xy_kp, xy_ki, xy_kd, xy_ki_limit, speed_limit);
 	set_pid(&y_pid, xy_kp, xy_ki, xy_kd, xy_ki_limit, speed_limit);
-	set_pid(&heading_pid, heading_kp, heading_ki, heading_kd, heading_ki_limit, speed_limit);
+	set_pid(&heading_pid, heading_kp, heading_ki, heading_kd, heading_ki_limit, angular_speed_limit);
 	
 	set_pid(&motorA_PID, motor_kp, motor_ki, motor_kd, motor_ki_limit, 100);
 	set_pid(&motorB_PID, motor_kp, motor_ki, motor_kd, motor_ki_limit, 100);
