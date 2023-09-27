@@ -3,7 +3,7 @@
 
 #include "stm32f4xx.h"
 
-/*----------------------OPENMV_USARTÅäÖÃºê ------------------------*/
+/*----------------------OPENMV_USARTï¿½ï¿½ï¿½Ãºï¿½ ------------------------*/
 #define OPENMV_USART                  USART2
 #define OPENMV_USART_BaudRate  				9600
 #define OPENMV_USART_CLK      				RCC_APB1Periph_USART2
@@ -24,9 +24,8 @@
 #define OPENMV_HEADER 								0x0550
 #define OPENMV_TAIL										0x66ff
 
-extern int mv_target_cx, mv_target_cy;
+extern int Mv_Target_cx, Mv_Target_cy;
 extern u8 mark1;
-
 void OPENMV_USART_Config(void);
 void OpenMV_Display_Specs(void);
 int OpenMV_Change_Mode(u8 mode);

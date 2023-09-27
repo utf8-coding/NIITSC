@@ -7,7 +7,7 @@
 #include "infrared.h"
 
 //public:
-int mv_target_cx = 0, mv_target_cy = 0;
+int Mv_Target_cx = 0, Mv_Target_cy = 0;
 u8 mark1 = 0;
 
 //internal:
@@ -45,8 +45,8 @@ void OPENMV_USART_Config(void)
   USART_InitStructure.USART_Parity = USART_Parity_No;
   USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
   
-  USART_Init(OPENMV_USART,&USART_InitStructure); //³õÊ¼»¯´®¿Ú1
-  USART_Cmd(OPENMV_USART,ENABLE); //Ê¹ÄÜ´®¿Ú1
+  USART_Init(OPENMV_USART,&USART_InitStructure); //ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
+  USART_Cmd(OPENMV_USART,ENABLE); //Ê¹ï¿½Ü´ï¿½ï¿½ï¿½1
   
   USART_ITConfig(OPENMV_USART, USART_IT_RXNE, ENABLE);
 

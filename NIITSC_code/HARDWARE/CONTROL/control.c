@@ -13,21 +13,22 @@
 #include "openmv.h"
 
 //==================== Public vars =====================:
-float speed_limit = 0.5, angular_speed_limit = 0.1;
+float speed_limit = 0.5, angular_speed_limit = 0.1; //speed lmit should be smaller than 0.8 m/s
 
 //==================== Internal vars =====================:
 //constants & PIDs
 PID x_pid, y_pid, heading_pid, openmv_x_PID, openmv_y_PID, motorA_PID, motorB_PID, motorC_PID, motorD_PID;
-const float H = 0.188, W = 0.25;
+const float H = 0.188, W = 0.25, R = 0.313, PI = 3.1415926535;
 const float xy_kp = 0.80,	 	xy_ki = 0.05, 			xy_kd = 0, 			xy_ki_limit = 0.1,
 			heading_kp = 0.07, 	heading_ki = 0.001, 	heading_kd = 0, 	heading_ki_limit = 0.1,
-			motor_kp = 0.5, 	motor_ki = 0.01, 		motor_kd = 0, 		motor_ki_limit = 30,
+			//motor speed unit is m/s, should start from a small value
+			motor_kp = 0.5, 	motor_ki = 0.01, 		motor_kd = 0, 		motor_ki_limit = 0.05, 
 			mv_kp = 0.008, 		mv_ki = 0.0005, 		mv_kd = 0, 			mv_ki_limit = 0.1;
 const float openmv_correction_threshold = 5;
 
 //Location system mode
 ControlMode control_mode = stop;
-//Turning system
+//Turning functions
 int ideal_heading = 0, ideal_ring = 0; //For 90 degree turning
 //Coordinate mode
 float target_x = 0, target_y = 0, target_heading = 0;
@@ -122,7 +123,7 @@ void set_mode(ControlMode mode)
 }
 
 //==================== control loop related =====================:
-void clear_state_stop() //Remove the effect of previous PIDs
+void clear_state_stop() //Remove the accumulated effects of previous errors in PIDs
 {
 	set_target(OPS_x, OPS_y, OPS_heading);
 	set_abs_speed(0, 0, 0);
@@ -149,7 +150,7 @@ void check_stable(void)
 	prev_x = OPS_x; prev_y = OPS_y; prev_heading = OPS_heading;
 }
 
-//Only available for coordinate mode.
+//Only available for coordinateMode.
 void check_arrive(void)
 {
 	if(fabs(x_pid.error) < 0.025 && fabs(y_pid.error) < 0.025 && fabs(heading_pid.error) < 1.5)
@@ -158,8 +159,71 @@ void check_arrive(void)
 			flag_arrive = 0;
 }
 
+//Only available for openmvMode
+void check_openmv_arrive(void)
+{
+	if(openmv_x_PID.error < openmv_correction_threshold && openmv_y_PID.error < openmv_correction_threshold)
+		flag_arrive = 1;
+	else 
+		flag_arrive = 0;
+}
 
 //==================== control calculations =====================:
+//Using global var{absVx, absVy}, setting var{relVx, relVy}:
+void openmv_to_rel_speed(void)
+{
+	pid_calculate(&openmv_x_PID, 0, Mv_Target_cx);
+	pid_calculate(&openmv_y_PID, 0, Mv_Target_cy);
+
+	relVx = openmv_x_PID.output/80;
+	relVy = openmv_y_PID.output/80; //refine needed.
+}
+
+//Using global var{target_x, target_y, target_heading}, setting global var{absVx, absVy, w}
+void target_to_abs_speed(void)
+{
+	pid_calculate(&x_pid, target_x, OPS_x);
+	pid_calculate(&y_pid, target_y, OPS_y);
+	pid_calculate(&heading_pid, target_heading, OPS_heading+OPS_ring*360);
+
+	absVx = x_pid.output;
+	absVy = y_pid.output;
+	w = heading_pid.output*180*R/PI;
+}
+
+//Using global var{absVx, absVy}, setting var{relVx, relVy}:
+void abs_speed_to_rel_speed()
+{
+	relVx = +(relVx)*cos(OPS_heading/PI) - (relVy)*sin(OPS_heading/PI);
+	relVy =  (relVx)*sin(OPS_heading/PI) + (relVy)*cos(OPS_heading/PI);
+}
+
+//Desynthesize speed given in total, using global var{relVx, relVy, w}, global val {H, W}: 
+void rel_speed_to_motor_speed(void)
+{
+	float speed[4]; //A, B, C, D drag the car to test.
+	speed[0] = (relVy + relVx + w * R); 
+	speed[1] = (relVy - relVx - w * R);
+	speed[2] = (relVy - relVx + w * R); 
+	speed[3] = (relVy + relVx - w * R);
+
+	set_target_motor_speed(speed[0], speed[1], speed[2], speed[3]);
+}
+
+//Using global var{motorA_PID(and BCD), where PWM value = 150* real speed 
+//motorA_target_speed(&BCD), Enc_Motor_A_Speed(&BCD)}: 
+void motor_speed_to_motor_pwm(void)
+{
+	pid_calculate(&motorA_PID, motorA_target_speed, Enc_Motor_A_Speed);
+	pid_calculate(&motorB_PID, motorB_target_speed, Enc_Motor_B_Speed);
+	pid_calculate(&motorC_PID, motorC_target_speed, Enc_Motor_C_Speed);
+	pid_calculate(&motorD_PID, motorD_target_speed, Enc_Motor_D_Speed);
+
+	Set_Pwm_All(motorA_PID.output *150, 
+				motorB_PID.output *150,
+				motorC_PID.output *150,
+				motorD_PID.output*150);
+}
 
 //Public functions:
 //==================== exposed control functions =====================:
@@ -183,41 +247,92 @@ void Control_Loop(void)
 {
 	check_stable();
 
+	// NOTE that this is a fall through logic that all the calculation/ execution 
+	// below a mode is going to be run purposefully. (NO EXTRA BREAK NEEDED IN switch HERE)
 	switch (control_mode)
 	{
 		case stop:
 			break;
-		
+
+		case coordinateMode:
+		{
+			target_to_abs_speed();
+			check_arrive();
+			//continue
+		}
+
+		case absoluteSpeedMode:
+		case openmvMode:
+		{
+			if(absoluteSpeedMode)
+			{
+				abs_speed_to_rel_speed();
+			} else if (openmvMode)
+			{
+				check_openmv_arrive();
+				openmv_to_rel_speed();
+			}
+			//continue
+		}
+
 		case relativeSpeedMode:
 		{
-
-			break;
+			rel_speed_to_motor_speed();
+			//continue
 		}
 		
 		default:
-			break;
+		{
+			motor_speed_to_motor_pwm();
+		}
+
 	}
 }
 
-//Different modes/moves:
+//Different modes/moves (all repeatable):
 void Stop_Run(void)
 {
-	set_mode(stop);
+	if(control_mode != stop) set_mode(stop);
 }
 
 void Rel_Speed_Run(float vx, float vy, float w)
 {
+	if(control_mode != relativeSpeedMode)
+	{
+		set_mode(relativeSpeedMode);
+	}
 
+	if(vx + vy + w != relVx + relVy + w)
+	{
+		set_rel_speed(vx, vy, w);
+	}
 }
 
 void Abs_Speed_Run(float vx, float vy, float w)
 {
+	if(control_mode != absoluteSpeedMode) 
+	{
+		set_mode(absoluteSpeedMode);
+		set_abs_speed(vx, vy, w);
+	}
 
+	if(vx + vy + w != absVx + absVy + w)
+	{
+		set_abs_speed(vx, vy, w);
+	}
 }
 
 void Target_Run(float x, float y, float heading)
 {
+	if(control_mode != coordinateMode)
+	{
+ 		set_mode(coordinateMode);
+	}
 
+	if(target_x + target_y + target_heading != x + y + heading)
+	{
+		set_target(x, y, heading);
+	}
 }
 
 void Turn_Right90(void)
@@ -225,8 +340,7 @@ void Turn_Right90(void)
 	ideal_heading += 90;
 	float turn_heading = ideal_ring*360 + ideal_heading;
 	
-	wheel_speed_calc(0, 0, 0.5);
-	Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
+	Rel_Speed_Run(0, 0, 0.5);
 	
 	while(OPS_heading + OPS_ring*360 <= turn_heading-1);
 	
@@ -237,7 +351,7 @@ void Turn_Right90(void)
 	}
 	target_heading = ideal_heading;
 	
-	Set_Speed_All(0, 0, 0, 0);
+	Stop_Run();
 }
 
 void Turn_Left90(void)
@@ -245,8 +359,7 @@ void Turn_Left90(void)
 	ideal_heading -= 90;
 	float turn_heading = ideal_ring*360 + ideal_heading;
 	
-	wheel_speed_calc(0, 0, -0.5);
-	Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
+	Rel_Speed_Run(0, 0, 0.5);
 	
 	while(OPS_heading + OPS_ring*360 >= turn_heading+1);
 	
@@ -257,22 +370,7 @@ void Turn_Left90(void)
 	}
 	target_heading = ideal_heading;
 	
-	Set_Speed_All(0, 0, 0, 0);
-}
-
-void Openmv_Correction(void)
-{
-	pid_calculate(&openmv_x_PID, 0, mv_target_cx);
-	pid_calculate(&openmv_y_PID, 0, mv_target_cy);
-	//Set_Speed(openmv_x_PID.output, openmv_y_PID.output, 0);
-}
-
-u8 Openmv_Correction_Ready(void)
-{
-	if(openmv_x_PID.error < openmv_correction_threshold && openmv_y_PID.error < openmv_correction_threshold)
-		return 1;
-	else 
-		return 0;
+	Stop_Run();
 }
 
 void Control_Display_Specs(void)
@@ -287,23 +385,7 @@ void Control_Display_Specs(void)
 }
 
 //==================== temp unused funcs =====================:
-
-// void wheel_speed_calc(float vx, float vy, float vw) //m/s
 // {
-// 	int temp[4];
-// 	temp[0] = (vy + vx + vw * (H + W)); 
-// 	temp[1] = (vy - vx - vw * (H + W));
-// 	temp[2] = (vy - vx + vw * (H + W)); 
-// 	temp[3] = (vy + vx - vw * (H + W));
-	
-// 	//Unify if too big:(problematic)
-// 	int max_speed = 0;
-// 	for(int itr = 0; itr < 4; itr++)
-// 	{
-// 		if (abs(max_speed) < abs(temp[itr]))
-// 			max_speed = temp[itr];
-// 	}
-	
 // 	if (abs(max_speed) > speed_limit)
 // 	{
 // 		motorA_speed=temp[0]*speed_limit/abs(max_speed);
@@ -318,59 +400,6 @@ void Control_Display_Specs(void)
 // 		motorD_speed=temp[3];
 // 	}
 // }
-
-// void coordinate_Loop(void)
-// {
-// 	pid_calculate(&x_pid, target_x, OPS_x);
-// 	pid_calculate(&y_pid, target_y, OPS_y);
-// 	pid_calculate(&heading_pid, target_heading, OPS_heading+OPS_ring*360);
-	
-// 	relVx = -(y_pid.output)*sin(OPS_heading/PI)+(x_pid.output)*cos(OPS_heading/PI);
-// 	relVy = (y_pid.output)*cos(OPS_heading/PI)+(x_pid.output)*sin(OPS_heading/PI);
-// 	w = heading_pid.output;
-	
-// 	wheel_speed_calc(vx,vy,w);
-	
-// 	Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
-	
-// 	check_stable();
-// }
-
-// void Set_Control_Mode(ControlMode mode)
-// {
-// 	control_mode = mode;
-// 	if(mode == coordinateMode)
-// 	{
-// 		reset_pid(&x_pid);
-// 		reset_pid(&y_pid);
-// 		reset_pid(&heading_pid);
-// 	}
-		
-// 	target_x = OPS_x; target_x = OPS_y; target_heading = OPS_heading;
-// 	vx = 0; vy = 0; w = 0;
-// }	
-
-
-// void Wheel_Run_Loop(void)
-// {
-// 	if (control_mode == stop)
-// 	{
-// 		Set_Speed_All(0, 0, 0, 0);
-// 		return;
-// 	}
-// 	else if(control_mode == coordinateMode)
-// 	{
-// 		coordinate_Loop();
-// 		wheel_speed_calc(vx, vy, w);
-// 		Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
-// 	}
-// 	else if(control_mode == velocityMode)
-// 	{
-// 		wheel_speed_calc(vx, vy, w);
-// 		Set_Speed_All(motorA_speed, motorB_speed, motorC_speed, motorD_speed);
-// 	}
-// }
-
 
 // void Go_Position_Test(float x, float y, float heading)
 // {
