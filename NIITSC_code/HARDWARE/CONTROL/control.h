@@ -2,7 +2,7 @@
 #define __CONTROL_H
 #include "sys.h"
   /**************************************************************************
-¿ØÖÆº¯Êý¶¨Òå£»²ÎÊý¶¨Òå
+ï¿½ï¿½ï¿½Æºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½å£»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 **************************************************************************/
 
 typedef struct
@@ -32,9 +32,10 @@ typedef struct
 
 typedef enum
 {
-	coordinateMode,
-	velocityMode,
-	stop
+	stop,
+	relativeSpeedMode,
+	absoluteSpeedMode,
+	coordinateMode
 } ControlMode;
 
 
