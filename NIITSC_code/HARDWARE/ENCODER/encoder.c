@@ -18,7 +18,7 @@ void Encoder_Init_All(void){
 	Encoder2_Init();
 	Encoder3_Init();
 	Encoder4_Init();
-	Encoder_Tim_Config(1000, 8400); // 84MHz/8400/1000 = 10Hz
+	Encoder_Tim_Config(1000-1, 8400-1); // 84MHz/8400/1000 = 10Hz
 }
 
 void Encoder1_Init(void)
@@ -42,12 +42,12 @@ void Encoder1_Init(void)
 	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInitStructure.TIM_Period = 65536 - 1;		//ARR
-	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//²»·ÖÆµ
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//ï¿½ï¿½ï¿½ï¿½Æµ
 	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(ENCODER1_TIM, &TIM_TimeBaseInitStructure);
 
 	TIM_ICInitTypeDef TIM_ICInitStructure;
-	TIM_ICStructInit(&TIM_ICInitStructure);   //Ã¿Ò»Ïî°´ÕÕÈ±Ê¡ÖµÌîÈë
+	TIM_ICStructInit(&TIM_ICInitStructure);   //Ã¿Ò»ï¿½î°´ï¿½ï¿½È±Ê¡Öµï¿½ï¿½ï¿½ï¿½
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(ENCODER1_TIM, &TIM_ICInitStructure);
 	
@@ -77,12 +77,12 @@ void Encoder2_Init(void)
 	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInitStructure.TIM_Period = 65536 - 1;		//ARR
-	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//²»·ÖÆµ
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//ï¿½ï¿½ï¿½ï¿½Æµ
 	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(ENCODER2_TIM, &TIM_TimeBaseInitStructure);
 
 	TIM_ICInitTypeDef TIM_ICInitStructure;
-	TIM_ICStructInit(&TIM_ICInitStructure);   //Ã¿Ò»Ïî°´ÕÕÈ±Ê¡ÖµÌîÈë
+	TIM_ICStructInit(&TIM_ICInitStructure);   //Ã¿Ò»ï¿½î°´ï¿½ï¿½È±Ê¡Öµï¿½ï¿½ï¿½ï¿½
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(ENCODER2_TIM, &TIM_ICInitStructure);
 	
@@ -112,12 +112,12 @@ void Encoder3_Init(void)
 	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInitStructure.TIM_Period = 65536 - 1;		//ARR
-	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//²»·ÖÆµ
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//ï¿½ï¿½ï¿½ï¿½Æµ
 	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(ENCODER3_TIM, &TIM_TimeBaseInitStructure);
 
 	TIM_ICInitTypeDef TIM_ICInitStructure;
-	TIM_ICStructInit(&TIM_ICInitStructure);   //Ã¿Ò»Ïî°´ÕÕÈ±Ê¡ÖµÌîÈë
+	TIM_ICStructInit(&TIM_ICInitStructure);   //Ã¿Ò»ï¿½î°´ï¿½ï¿½È±Ê¡Öµï¿½ï¿½ï¿½ï¿½
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(ENCODER3_TIM, &TIM_ICInitStructure);
 	
@@ -147,12 +147,12 @@ void Encoder4_Init(void)
 	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInitStructure.TIM_Period = 65536 - 1;		//ARR
-	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//²»·ÖÆµ
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 1 - 1;		//ï¿½ï¿½ï¿½ï¿½Æµ
 	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(ENCODER4_TIM, &TIM_TimeBaseInitStructure);
 
 	TIM_ICInitTypeDef TIM_ICInitStructure;
-	TIM_ICStructInit(&TIM_ICInitStructure);   //Ã¿Ò»Ïî°´ÕÕÈ±Ê¡ÖµÌîÈë
+	TIM_ICStructInit(&TIM_ICInitStructure);   //Ã¿Ò»ï¿½î°´ï¿½ï¿½È±Ê¡Öµï¿½ï¿½ï¿½ï¿½
 	TIM_ICInitStructure.TIM_ICFilter = 0x10;
 	TIM_ICInit(ENCODER4_TIM, &TIM_ICInitStructure);
 	
@@ -161,9 +161,9 @@ void Encoder4_Init(void)
 	TIM_Cmd(ENCODER4_TIM, ENABLE);
 }
 /**************************************************************************
-º¯Êý¹¦ÄÜ£ºµ¥Î»Ê±¼ä¶ÁÈ¡±àÂëÆ÷¼ÆÊý
-Èë¿Ú²ÎÊý£º¶¨Ê±Æ÷
-·µ»Ø  Öµ£ºËÙ¶ÈÖµ
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü£ï¿½ï¿½ï¿½Î»Ê±ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+ï¿½ï¿½ï¿½ï¿½  Öµï¿½ï¿½ï¿½Ù¶ï¿½Öµ
 **************************************************************************/
 int read_Velocity(TIM_TypeDef* TIMX)
 {
@@ -204,23 +204,23 @@ void Encoder_Tim_Config(u16 arr, u16 psc){
 	
 //	TIM_InternalClockConfig(TIM7);//the internal clock is default so do not need to used this conf
 
-	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1; //ÊäÈë²¶»ñµÄ·ÖÆµ
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1; //ï¿½ï¿½ï¿½ë²¶ï¿½ï¿½Ä·ï¿½Æµ
 	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInitStructure.TIM_Period = arr;
 	TIM_TimeBaseInitStructure.TIM_Prescaler = psc;
-	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0; //ÖØ¸´´ÎÊý(¸ß¼¶¶¨Ê±Æ÷)
+	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0; //ï¿½Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ß¼ï¿½ï¿½ï¿½Ê±ï¿½ï¿½)
 	
-	TIM_TimeBaseInit(TIM7,&TIM_TimeBaseInitStructure);//³õÊ¼»¯TIM7
+	TIM_TimeBaseInit(TIM7,&TIM_TimeBaseInitStructure);//ï¿½ï¿½Ê¼ï¿½ï¿½TIM7
 	
 	TIM_ClearFlag(TIM7, TIM_FLAG_Update); //to prevent enter the interupt immediatelly after config
-	TIM_ITConfig(TIM7, TIM_IT_Update, ENABLE); //ÔÊÐí¶¨Ê±Æ÷3¸üÐÂÖÐ¶Ï
-	TIM_Cmd(TIM7,ENABLE); //Ê¹ÄÜ¶¨Ê±Æ÷
+	TIM_ITConfig(TIM7, TIM_IT_Update, ENABLE); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½3ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
+	TIM_Cmd(TIM7,ENABLE); //Ê¹ï¿½Ü¶ï¿½Ê±ï¿½ï¿½
 	
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//ÉèÖÃÏµÍ³ÖÐ¶ÏÓÅÏÈ¼¶·Ö×é2
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½È¼ï¿½ï¿½ï¿½ï¿½ï¿½2
 	
 	NVIC_InitStructure.NVIC_IRQChannel = TIM7_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00; //ÇÀÕ¼ÓÅÏÈ¼¶1
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00; //×ÓÓÅÏÈ¼¶3
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00; //ï¿½ï¿½Õ¼ï¿½ï¿½ï¿½È¼ï¿½1
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00; //ï¿½ï¿½ï¿½ï¿½ï¿½È¼ï¿½3
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 }

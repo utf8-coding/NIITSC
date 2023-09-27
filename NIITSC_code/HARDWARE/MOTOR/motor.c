@@ -7,7 +7,7 @@ void TIM_PWM_Init(u32 arr, u32 psc);
 void Motor_Init(void)
 {
 	Control_Motor_Init();
-	TIM_PWM_Init(101-1, 8400-1);
+	TIM_PWM_Init(101-1, 84-1);
 }
 
 /**************************************************************************
