@@ -92,4 +92,6 @@ extern int encoder_Count_Buff[encoder_Cnt_Num];
 /*==============================FUNCTION============================*/
 void Encoder_Init_All(void);
 void Encoder_Display_Spects(void);
+int Discounter_Arrive(void);
+void Set_Discounter(int discount);
 #endif

@@ -9,10 +9,10 @@ void Encoder3_Init(void);
 void Encoder4_Init(void);
 void Encoder_Tim_Config(u16 arr, u16 psc);
 
+int discounter = 0;
 
 int encoder_Count_Buff[encoder_Cnt_Num] = {0};
 /*===================ENCODER Initialize====================*/
-
 void Encoder_Init_All(void){
 	Encoder1_Init();
 	Encoder2_Init();
@@ -227,6 +227,7 @@ void Encoder_Tim_Config(u16 arr, u16 psc){
 
 void TIM7_IRQHandler(void){
 	if(TIM_GetFlagStatus(TIM7, TIM_FLAG_Update) == SET){
+		if (discounter != 0) discounter--;
 		encoder_Count_Buff[encoder_Cnt_1] = read_Velocity(ENCODER1_TIM);
 		encoder_Count_Buff[encoder_Cnt_2] = read_Velocity(ENCODER2_TIM);
 		encoder_Count_Buff[encoder_Cnt_3] = read_Velocity(ENCODER3_TIM);
@@ -242,4 +243,14 @@ void Encoder_Display_Spects(void)
 	OLED_ShowSignedNum(2, 6, encoder_Count_Buff[encoder_Cnt_1], 3);
 	OLED_ShowSignedNum(3, 1, encoder_Count_Buff[encoder_Cnt_3], 3);
 	OLED_ShowSignedNum(3, 6, encoder_Count_Buff[encoder_Cnt_4], 3);
+}
+
+void Set_Discounter(int discount) //In 0.1 sec
+{
+	discounter = discount;
+}
+
+int Discounter_Arrive()
+{
+	return discounter == 0;
 }

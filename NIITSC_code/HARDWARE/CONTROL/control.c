@@ -21,11 +21,11 @@ float speed_limit = 0.5, angular_speed_limit = 0.1; //speed lmit should be small
 //==================== Internal vars =====================:
 //constants & PIDs
 PID x_pid, y_pid, heading_pid, openmv_x_PID, openmv_y_PID, motorA_PID, motorB_PID, motorC_PID, motorD_PID;
-const float H = 0.188, W = 0.25, R = 0.313, PI = 3.1415926535;
+const float H = 0.188, W = 0.25, R = 0.413, PI = 3.1415926535;
 const float xy_kp = 0.80,	 	xy_ki = 0.05, 			xy_kd = 0, 			xy_ki_limit = 0.1,
 			heading_kp = 0.07, 	heading_ki = 0.001, 	heading_kd = 0, 	heading_ki_limit = 0.1,
 			//motor speed unit is m/s, should start from a small value
-			motor_kp = 0.5, 	motor_ki = 0.01, 		motor_kd = 0, 		motor_ki_limit = 0.05, 
+			motor_kp = 2, 	motor_ki = 0.015, 		motor_kd = 0, 		motor_ki_limit = 0.5, 
 			mv_kp = 0.008, 		mv_ki = 0.0005, 		mv_kd = 0, 			mv_ki_limit = 0.1;
 const float openmv_correction_threshold = 5;
 
@@ -191,14 +191,14 @@ void target_to_abs_speed(void)
 
 	absVx = x_pid.output;
 	absVy = y_pid.output;
-	w = heading_pid.output*180*R/PI;
+	w = heading_pid.output*R*PI/180;
 }
 
 //Using global var{absVx, absVy}, setting var{relVx, relVy}:
 void abs_speed_to_rel_speed()
 {
-	relVx = +(relVx)*cos(OPS_heading/PI) - (relVy)*sin(OPS_heading/PI);
-	relVy =  (relVx)*sin(OPS_heading/PI) + (relVy)*cos(OPS_heading/PI);
+	relVx = +(absVx)*cos(OPS_heading/180*PI) - (absVy)*sin(OPS_heading/180*PI);
+	relVy =  (absVx)*sin(OPS_heading/180*PI) + (absVy)*cos(OPS_heading/180*PI);
 }
 
 //Desynthesize speed given in total, using global var{relVx, relVy, w}, global val {H, W}: 
@@ -225,7 +225,7 @@ void motor_speed_to_motor_pwm(void)
 	Set_Pwm_All(motorA_PID.output *150, 
 				motorB_PID.output *150,
 				motorC_PID.output *150,
-				motorD_PID.output*150);
+				motorD_PID.output *150);
 }
 
 //Public functions:
@@ -237,9 +237,9 @@ void Control_Init(void)
 	set_pid(&heading_pid, heading_kp, heading_ki, heading_kd, heading_ki_limit, speed_limit);
 	
 	set_pid(&motorA_PID, motor_kp, motor_ki, motor_kd, motor_ki_limit, 100);
-	set_pid(&motorA_PID, motor_kp, motor_ki, motor_kd, motor_ki_limit, 100);
-	set_pid(&motorA_PID, motor_kp, motor_ki, motor_kd, motor_ki_limit, 100);
-	set_pid(&motorA_PID, motor_kp, motor_ki, motor_kd, motor_ki_limit, 100);
+	set_pid(&motorB_PID, motor_kp, motor_ki, motor_kd, motor_ki_limit, 100);
+	set_pid(&motorC_PID, motor_kp, motor_ki, motor_kd, motor_ki_limit, 100);
+	set_pid(&motorD_PID, motor_kp, motor_ki, motor_kd, motor_ki_limit, 100);
 
 	set_pid(&openmv_x_PID, mv_kp, mv_ki, mv_kd, mv_ki_limit, angular_speed_limit); //speed_limit is problematic here, needs fine tune
 	set_pid(&openmv_y_PID, mv_kp, mv_ki, mv_kd, mv_ki_limit, angular_speed_limit);
