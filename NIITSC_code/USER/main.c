@@ -31,11 +31,11 @@ int main(void)
 	Control_Init();
 	Encoder_Init_All();
 	Screen_Init();
+	Laser_Init();
 	
 	QRCODE_UART_Config();
 	SERVO_USART_Config();
 	Moto_Init(18 - 1, 8400 -1);
-	Laser_Init();
 	
 	
 //	OPENMV_USART_Config();
@@ -47,24 +47,24 @@ int main(void)
 	
 	while (1)
 	{
-		OpenMV_Data_Process();
 		OPS_Data_Process();
-		Input_Disp_Loop();
-		
 		if(!flag_ops_ready){
 			OLED_ShowString(1, 1, "OPS prep.");
 			continue;
 		}
 		
+		OpenMV_Data_Process();
+		Input_Disp_Loop();
+		
 		if (flag_start)
 		{
-			Run();
+//			Run();
 //			speed_limit = 80
 //			Set_Control_Mode(coordinateMode);
 //			Go_Position_Test(-0.15, 1.5, 90);
 			
 //			Set_Control_Mode(velocityMode);
-//			Set_Speed(-0.2, 0, 0);
+			Set_Pwm_All(100, 100, 100, 100);
 //			Wheel_Run_Loop();
 		} else
 		{
