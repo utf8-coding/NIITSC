@@ -39,19 +39,14 @@ typedef enum
 	coordinateMode
 } ControlMode;
 
-
-extern u8 speed_limit, angular_speed_limit;
-
 void Control_Display_Specs(void);
-void Go_Position_Test(float x, float y, float heading);
-void Wheel_Run_Loop(void);
-void Set_Speed_All(float speedA, float speedB, float speedC, float speedD);
-void Set_Target_Heading(float heading);
-void Set_Target_Coordinate(float x, float y);
-void Set_Control_Mode(ControlMode mode);
-void Openmv_Correction(void);
-u8 Openmv_Correction_Ready(void);
 void Control_Init(void);
+void Control_Loop(void);
+void Stop_Run(void);
+void Open_Mv_Run(void);
+void Rel_Speed_Run(float vx, float vy, float w);
+void Abs_Speed_Run(float vx, float vy, float w);
+void Target_Run(float x, float y, float heading);
 void Turn_Left90(void);
 void Turn_Right90(void);
 

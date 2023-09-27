@@ -57,7 +57,7 @@
 
 #define MOTORA_PWM_PIN           						   GPIO_Pin_4       		 // MOTOR1_PWM 引脚      
 #define MOTORA_PWM_PORT          						   GPIOB                 // MOTOR1_PWM GPIO端口  
-#define MOTORA_PWM_SOURCE        						   GPIO_PinSource5       // MOTOR1_PWM GPIO端口  
+#define MOTORA_PWM_SOURCE        						   GPIO_PinSource4       // MOTOR1_PWM GPIO端口  
 #define MOTORA_PWM_PIN_CLK       						   RCC_AHB1Periph_GPIOB	 // MOTOR1_PWM GPIO端口时钟
 						 
 #define MOTORA_PWM_TIM           						   TIM3                  // MOTOR1_PWM GPIO端口  
@@ -70,7 +70,7 @@
 
 #define MOTORB_PWM_PIN       						       GPIO_Pin_5       		 // MOTOR2_PWM 引脚      
 #define MOTORB_PWM_PORT      						       GPIOB                  // MOTOR2_PWM GPIO端口    
-#define MOTORB_PWM_SOURCE    						       GPIO_PinSource4                  // MOTOR2_PWM GPIO端口  
+#define MOTORB_PWM_SOURCE    						       GPIO_PinSource5                  // MOTOR2_PWM GPIO端口  
 #define MOTORB_PWM_PIN_CLK   						       RCC_AHB1Periph_GPIOB	 // MOTOR2_PWM GPIO端口时钟
 																				 
 #define MOTORB_PWM_TIM       						       TIM3                  // MOTOR2_PWM GPIO端口  

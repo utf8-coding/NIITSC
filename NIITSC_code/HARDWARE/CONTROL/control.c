@@ -12,6 +12,9 @@
 #include "oled.h"
 #include "openmv.h"
 
+//==================== Internal function pre-declare =====================:
+void clear_state_stop(void);
+
 //==================== Public vars =====================:
 float speed_limit = 0.5, angular_speed_limit = 0.1; //speed lmit should be smaller than 0.8 m/s
 
@@ -293,6 +296,14 @@ void Control_Loop(void)
 void Stop_Run(void)
 {
 	if(control_mode != stop) set_mode(stop);
+}
+
+void Open_Mv_Run()
+{
+	if(control_mode != openmvMode)
+	{
+		set_mode(openmvMode);
+	}
 }
 
 void Rel_Speed_Run(float vx, float vy, float w)
