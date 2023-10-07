@@ -121,277 +121,56 @@ void USART3_IRQHandler(void)
 	}
 }
 
-void servoDefault(void){
-//	moto_Action(up, 9, 500);
-	runActionGroup(defa, 1);  //张开 向内
+/*=============================default============================*/
+
+void servoDefault(u16 nms){
+	runActionGroup(defaut, 1);  //张开 向内
+	delay_ms(nms);
 }
 
-void servoMvCalib(void){
-	runActionGroup(screwFront, 1); 
-	delay_ms(200);
+/*=============================calib============================*/
+
+// action can be calibObj or calibRough
+void servoMvCalib(servoAction action, u16 nms){
+	runActionGroup(action, 1); 
+	delay_ms(nms);
 }
 
-
-void plateRotate(u8 color_Index, u16 nms){
-	switch(color_Index){
-		case 0:
-		case 4:
-			runActionGroup(plateRotate1, 1);
-			delay_ms(nms);
-			break;
-		case 1:
-		case 5:
-			runActionGroup(plateRotate2, 1);
-			delay_ms(nms);
-			break;
-		case 2:
-		case 6:
-			runActionGroup(plateRotate3, 1);
-			delay_ms(nms);
-			break;
-	}
-}
 /*=============================obj============================*/
-void get_Obj(void){
-	
-//	runActionGroup(screwFront, 1);		//2700
-	runActionGroup(handRelease, 1);		//2700
-	moto_Action(down, 9, 4000);   
-	
-	runActionGroup(handGet, 1);
-	delay_ms(700);	
-	
-	runActionGroup(screwBack, 1);		//2700
-	delay_ms(100);
-	plateRotate(color_Index, 10);
-	moto_Action(up, 9, 4050);     
-	
-	//放盘
-	moto_Action(down, 9, 1200);
-	runActionGroup(handRelease ,1);
-	delay_ms(300);
-	moto_Action(up, 9, 1200);
-	
-	runActionGroup(screwFront, 1);		//2700
+void get_Obj(u16 nms){
+	runActionGroup(getObj, 1);		
+	delay_ms(nms);
 }
 
 /*===============================rough=============================*/
-void put_Rough(void){
-	runActionGroup(handRelease, 1);	
-	delay_ms(10);
-	//回转
-	runActionGroup(screwBack, 1);		//2700
-	delay_ms(2700);
 
-	//收盘
-	plateRotate(color_Index, 10);
-	moto_Action(down, 9, 1200);
-	runActionGroup(handGet ,1);
-	delay_ms(300);
-	moto_Action(up, 9, 1200);
-	
-	runActionGroup(screwFront, 1); //向外
-	delay_ms(10);
-	moto_Action(down, 9, 8900);
-	runActionGroup(handRelease,1);
-	delay_ms(300);
-	moto_Action(up, 9, 8900);
-}
-
-void get_Rough(void){
-	//拿地
-	runActionGroup(handRelease, 1);		//2700
-	moto_Action(down, 9, 8500);
-	runActionGroup(handGet, 1);
-	delay_ms(300);
-	//回转 
-	runActionGroup(screwBack, 1);		//2700
-	delay_ms(10);
-	//转盘
-	plateRotate(color_Index, 10);
-	//同时上升
-	moto_Action(up, 9, 8700);
-	
-	runActionGroup(handGet, 1);
-	delay_ms(300);
-
-	//放盘
-	moto_Action(down, 9, 1200);
-	runActionGroup(handRelease,1);
-	delay_ms(300);
-	moto_Action(up, 9, 1200);
-	
-}
-
-void put_Down_Dep1(void){
-	runActionGroup(handRelease, 1);	
-	delay_ms(10);
-	//回转
-	runActionGroup(screwBack, 1);		//2700
-	delay_ms(2700);
-
-	//收盘
-	plateRotate(color_Index, 10);
-	moto_Action(down, 9, 1200);
-	runActionGroup(handGet ,1);
-	delay_ms(300);
-	moto_Action(up, 9, 1200);
-	
-	runActionGroup(screwFront, 1); //向外
-	delay_ms(10);
-	moto_Action(down, 9, 8900);
-	runActionGroup(handRelease,1);
-	delay_ms(300);
-	moto_Action(up, 9, 8900);
-}
-
-void put_Down_Dep2(void){
-	runActionGroup(handRelease, 1);	
-	delay_ms(10);
-	//回转
-	runActionGroup(screwBack, 1);		//2700
-	delay_ms(2700);
-
-	//收盘
-	plateRotate(color_Index, 10);
-	moto_Action(down, 9, 1200);
-	runActionGroup(handGet ,1);
-	delay_ms(300);
-	moto_Action(up, 9, 1200);
-	
-	runActionGroup(screwFront, 1); //向外
-	delay_ms(10);
-	moto_Action(down, 9, 8900);
-	runActionGroup(handRelease,1);
-	delay_ms(300);
-	moto_Action(up, 9, 8900);
-}
-//plate relate to color_Index
-void servo_Action(servoAction actionNum)
-{
-	switch(actionNum){
-		case defaut:
-			servoDefault();
-			break;
-		case calib:
-			servoMvCalib();
-			break;
-		case getObj:
-			get_Obj();
-			color_Index++;
-			break;			
-		case putRough:
-			put_Rough();
-			color_Index--;
-			break;
-		case getRough:
-			get_Rough();
-			color_Index++;
-			break;
-		case putDownDep1:
-			put_Down_Dep1();
-			color_Index--;
-			break;
-		case putDownDep2:
-			put_Down_Dep2();
-			color_Index--;
-			break;		
-	}
-}
-//			//放盘
-//			moto_Action(down, 9, 1200);
-//			runActionGroup(4,1);
-//			delay_ms(300);
-//			moto_Action(up, 9, 1200);
-//			//收盘
-//			moto_Action(up, 9, 1200);
-//			runActionGroup(4,1);
-//			delay_ms(300);
-//			moto_Action(down, 9, 1200);
-
-
-//		//放地
-//		moto_Action(down, 9, 8900);
-//		runActionGroup(4,1);
-//		delay_ms(300);
-//		moto_Action(up, 9, 8900);
-//		//拿地
-//		moto_Action(down, 9, 8500);
-//		runActionGroup(3,1);
-//		delay_ms(300);
-//		moto_Action(up, 9, 8700);
-/*===================步进电机dir初始化==========================*/
-void Moto_Init(u32 arr, u32 psc){
-	Moto_Dir_Init();
-	MOTO_PWM_Init(arr, psc);
-}
-void Moto_Dir_Init(void)          //初始化控制电机所需的IO
-{
-	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;         //推挽输出
-	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
-/*-------------------------AIN_GPIO_CONFIG--------------------------*/
-	RCC_AHB1PeriphClockCmd(MOTO_GPIO_CLK, ENABLE);  
-	
-	GPIO_InitStruct.GPIO_Pin = MOTO_GPIO_PIN;
-	GPIO_Init(MOTO_GPIO_PORT, &GPIO_InitStruct);
-	
-}
-
-
-/**************************************************************************
-	电机PWM初始化
-**************************************************************************/
-//84000000/arr 840 psc 100        1000
-//200 Pulse/round       
-void MOTO_PWM_Init(u32 arr, u32 psc)
-{
-	GPIO_InitTypeDef GPIO_InitStruct;
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
-	TIM_OCInitTypeDef  TIM_OCInitStructure;
-
-	
-	RCC_APB2PeriphClockCmd(MOTO_PWM_TIM_CLK, ENABLE);
-	RCC_AHB1PeriphClockCmd(MOTO_PWM_PIN_CLK, ENABLE);
-	GPIO_PinAFConfig(MOTO_PWM_PORT, MOTO_PWM_SOURCE, MOTO_PWM_AF);
-	//GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
-	
-	GPIO_InitStruct.GPIO_Pin = MOTO_PWM_PIN;
-	GPIO_Init(MOTO_PWM_PORT, &GPIO_InitStruct);
-	
-	TIM_DeInit(MOTO_PWM_TIM);
-
-	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1; //输入捕获的分频
-	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInitStructure.TIM_Period = arr;
-	TIM_TimeBaseInitStructure.TIM_Prescaler = psc;
-	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0; //重复次数(高级定时器)
-	TIM_TimeBaseInit(MOTO_PWM_TIM, &TIM_TimeBaseInitStructure);
-	
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-	TIM_OCInitStructure.TIM_Pulse = 0;
-	TIM_OC1Init(MOTO_PWM_TIM, &TIM_OCInitStructure); 
- 
-	TIM_OC1PreloadConfig(MOTO_PWM_TIM, TIM_OCPreload_Enable);  //使能TIM3在CCR2上的预装载寄存器
-	TIM_ARRPreloadConfig(MOTO_PWM_TIM, ENABLE);
-
-	TIM_Cmd(MOTO_PWM_TIM, ENABLE);
-
-}
-
-//200pulse/round   
-void moto_Action(motoDirEnum dir, int8_t speed, u16 nms){
-	if(dir == down)  		MOTODIR = 0;
-	else 					MOTODIR = 1;
-	MOTOPWM = speed;
+void put_Rough(u16 nms){
+	runActionGroup(putRough, 1);	
 	delay_ms(nms);
-	MOTOPWM = 0;
 }
+
+void get_Rough(u16 nms){
+	runActionGroup(getRough, 1);
+	delay_ms(nms);
+}
+
+/*===============================deposit=============================*/
+
+//暂存区下层
+void put_Down_Dep(u16 nms){
+	runActionGroup(putDownDep, 1);	
+	delay_ms(nms);
+}
+
+//暂存区上层
+void put_Up_Dep(u16 nms){
+	runActionGroup(putUpDep, 1);	
+	delay_ms(nms);
+}
+
+
+
+
+
+
+
