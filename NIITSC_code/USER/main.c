@@ -35,16 +35,13 @@ int main(void)
 	
 	QRCODE_UART_Config();
 	SERVO_USART_Config();
-	Moto_Init(18 - 1, 8400 -1);
-	
 	
 //	OPENMV_USART_Config();
-//	BUZZER_Init();
-//	BUZZER_Ms();
 
 	servoDefault();
 	delay_ms(1000);
 	
+	int period_temp = 0;
 	while (1)
 	{
 		OPS_Data_Process();
@@ -53,22 +50,62 @@ int main(void)
 			continue;
 		}
 		
+		Control_Loop();
 		OpenMV_Data_Process();
 		Input_Disp_Loop();
 		
 		if (flag_start)
 		{
+			Target_Run(0, 0.65, 0);
+			if(flag_arrive)
+			{
+				LED_Flip();
+//				Stop_Run();
+//				break;
+			}
 //			Run();
 //			speed_limit = 80
 //			Set_Control_Mode(coordinateMode);
 //			Go_Position_Test(-0.15, 1.5, 90);
 			
 //			Set_Control_Mode(velocityMode);
-			Set_Pwm_All(100, 100, 100, 100);
 //			Wheel_Run_Loop();
+			
 		} else
 		{
-			Set_Speed_All(0, 0, 0, 0);
+			Set_Pwm_All(0, 0, 0, 0);
 		}
 	}
 }
+
+//			if(period_temp == 0)
+//			{
+//				Set_Discounter(20);
+//				period_temp++;
+//			}
+//			
+//			if(period_temp ==1)
+//			{
+//				Rel_Speed_Run(0, 0.25, 0);
+//				if(Discounter_Arrive())
+//				{
+//					LED_Flip();
+//					Set_Discounter(50);
+//					period_temp ++;
+//				}
+//			}
+//			
+//			if(period_temp ==2)
+//			{
+//				Rel_Speed_Run(0, -0.08, 0);
+//				if(Discounter_Arrive())
+//				{
+//					LED_Flip();
+//					period_temp ++;
+//				}
+//			}
+//			
+//			if(period_temp ==3)
+//			{
+//				Rel_Speed_Run(0, 0, 0);
+//			}
