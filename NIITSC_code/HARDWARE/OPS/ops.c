@@ -63,45 +63,6 @@ void OPS_USART_Config(void)
 	NVIC_Init(&NVIC_InitStructure);
 }
 
-
-//中断版数据处理
-/*
-u8 OPS_Rx_Buffer[32] = {0x00};
-void USART1_IRQHandler()
-{
-	if(USART_GetITStatus(OPS_UART, USART_IT_RXNE) == SET)
-	{
-		//USART_TypeDef* UARTx, u8 *buffer, u8 buffer_size, u8 data_size, u8 *out_buffer, u16 header, u16 tail
-		if(Serial_Receive_Data_LH(UART5, OPS_Rx_Buffer, 30, 28, &OPS_data.data[2], 0x0d0a, 0x0a0d))
-		{
-			static u8 ring_lock = 0;
-			if (OPS_heading > 170 && -OPS_data.ActVal[1] < -170 && !ring_lock)
-			{
-				OPS_ring += 1;
-				ring_lock = 1;
-			}
-			else if (OPS_heading < -170 && -OPS_data.ActVal[1] > 170 && !ring_lock)
-			{
-				OPS_ring -= 1;
-				ring_lock = 1;
-			}
-			else if (OPS_heading >= -170 && OPS_heading <= 170)
-			{
-				ring_lock = 0;
-			}
-				
-			
-			OPS_heading = -OPS_data.ActVal[1];//degree
-			OPS_x = OPS_data.ActVal[4]/1000;
-			OPS_y = OPS_data.ActVal[5]/1000; //m
-		}
-
-		if(OPS_heading+OPS_x+OPS_y != 0 && !flag_ops_ready)
-			flag_ops_ready = 1;
-	}
-}
-*/
-
 void OPS_Calibrate(float x, float y, float heading)
 {
 	u8 update_x[4] = "ACTX";
@@ -114,28 +75,28 @@ void OPS_Calibrate(float x, float y, float heading)
 		u8 data[4];
 	}new_value;
 	
-	new_value.value = x;
+	new_value.value = x*1000;
 	Serial_SendArray(OPS_UART, update_x, 4);
-	Serial_SendArray(OPS_UART, new_value.data, 4);
+	Serial_SendArray(OPS_UART, &new_value.data[0], 4);
 	
-	delay_ms(10);
-	new_value.value = y;
+	delay_ms(30);
+	new_value.value = y*1000;
 	Serial_SendArray(OPS_UART, update_y, 4);
-	Serial_SendArray(OPS_UART, new_value.data, 4);
+	Serial_SendArray(OPS_UART, &new_value.data[0], 4);
 	
-	delay_ms(10);
-	new_value.value = -heading;
+	delay_ms(30);
+	new_value.value = -heading*1000;
 	Serial_SendArray(OPS_UART, update_j, 4);
-	Serial_SendArray(OPS_UART, new_value.data, 4);
+	Serial_SendArray(OPS_UART, &new_value.data[0], 4);
 }
 
 void OPS_Display_Specs(void)
 {
-	OLED_ShowString(1, 1, "OPS:");
-	OLED_ShowSignedNum(2, 1, (int)OPS_heading+OPS_ring*360, 14);
-	OLED_ShowSignedNum(3, 1, (int)(OPS_x*100), 6); 
-	OLED_ShowSignedNum(3, 9, (int)(OPS_y*100), 6); //cm here
-	OLED_ShowString(4, 1, "Reset~");
+	OLED_ShowString(1, 2, "OPS:");
+	OLED_ShowSignedNum(2, 2, (int)OPS_heading+OPS_ring*360, 12);
+	OLED_ShowSignedNum(3, 2, (int)(OPS_x*100), 5); 
+	OLED_ShowSignedNum(3, 9, (int)(OPS_y*100), 5); //cm here
+	OLED_ShowString(4, 2, "Reset~");
 }
 
 
@@ -265,4 +226,41 @@ void OPS_Data_Process(void){
 		MYDMA_Enable(DMA2_Stream7,38); //WHY？ 
 	*/
 }
-	
+
+//中断版数据处理
+/*
+u8 OPS_Rx_Buffer[32] = {0x00};
+void USART1_IRQHandler()
+{
+	if(USART_GetITStatus(OPS_UART, USART_IT_RXNE) == SET)
+	{
+		//USART_TypeDef* UARTx, u8 *buffer, u8 buffer_size, u8 data_size, u8 *out_buffer, u16 header, u16 tail
+		if(Serial_Receive_Data_LH(UART5, OPS_Rx_Buffer, 30, 28, &OPS_data.data[2], 0x0d0a, 0x0a0d))
+		{
+			static u8 ring_lock = 0;
+			if (OPS_heading > 170 && -OPS_data.ActVal[1] < -170 && !ring_lock)
+			{
+				OPS_ring += 1;
+				ring_lock = 1;
+			}
+			else if (OPS_heading < -170 && -OPS_data.ActVal[1] > 170 && !ring_lock)
+			{
+				OPS_ring -= 1;
+				ring_lock = 1;
+			}
+			else if (OPS_heading >= -170 && OPS_heading <= 170)
+			{
+				ring_lock = 0;
+			}
+				
+			
+			OPS_heading = -OPS_data.ActVal[1];//degree
+			OPS_x = OPS_data.ActVal[4]/1000;
+			OPS_y = OPS_data.ActVal[5]/1000; //m
+		}
+
+		if(OPS_heading+OPS_x+OPS_y != 0 && !flag_ops_ready)
+			flag_ops_ready = 1;
+	}
+}
+*/

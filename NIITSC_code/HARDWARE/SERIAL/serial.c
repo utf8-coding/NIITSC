@@ -12,6 +12,7 @@ void Serial_SendArray(USART_TypeDef * channel, uint8_t *array, uint16_t length)
 {
 	for (int i = 0; i < length; i ++)
 	{
+		while(USART_GetFlagStatus(channel, USART_FLAG_TXE) == RESET);
 		Serial_SendByte(channel, array[i]);
 	}
 }

@@ -1,9 +1,6 @@
 #ifndef __CONTROL_H
 #define __CONTROL_H
 #include "sys.h"
-  /**************************************************************************
-���ƺ������壻��������
-**************************************************************************/
 
 typedef struct
 {
@@ -50,5 +47,6 @@ void Target_Run(float x, float y, float heading);
 void Turn_Left90(void);
 void Turn_Right90(void);
 
+extern float speed_limit, angular_speed_limit;
 
 #endif

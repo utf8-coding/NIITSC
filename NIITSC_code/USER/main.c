@@ -35,13 +35,11 @@ int main(void)
 	
 	QRCODE_UART_Config();
 	SERVO_USART_Config();
-	
-//	OPENMV_USART_Config();
+	OPENMV_USART_Config();
 
-	servoDefault();
+	servoDefault(500);
 	delay_ms(1000);
 	
-	int period_temp = 0;
 	while (1)
 	{
 		OPS_Data_Process();
@@ -56,23 +54,10 @@ int main(void)
 		
 		if (flag_start)
 		{
-			Target_Run(0, 0.65, 0);
-			if(flag_arrive)
-			{
-				LED_Flip();
-//				Stop_Run();
-//				break;
-			}
-//			Run();
-//			speed_limit = 80
-//			Set_Control_Mode(coordinateMode);
-//			Go_Position_Test(-0.15, 1.5, 90);
-			
-//			Set_Control_Mode(velocityMode);
-//			Wheel_Run_Loop();
-			
+			Run();
 		} else
 		{
+			Stop_Run();
 			Set_Pwm_All(0, 0, 0, 0);
 		}
 	}

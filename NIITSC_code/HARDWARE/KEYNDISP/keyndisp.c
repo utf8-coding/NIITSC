@@ -10,6 +10,7 @@
 #include "serial.h"
 #include "infrared.h "
 #include "encoder.h"
+#include "delay.h"
 
 static int min_page = -1, max_page = 3, min_var_page = 0, max_var_page = 3;
 int flag_varmod = 0;
@@ -121,6 +122,7 @@ static void p0_r1(int d)
 
 static void p1_r4(int d)
 {
+	delay_ms(1000);
 	OPS_Calibrate(0, 0, 0); //see if this works.
 }
 	
@@ -229,7 +231,7 @@ void KEY_Init()
 	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_1;  
 	GPIO_Init(GPIOG, &GPIO_InitStructure);	
 	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_8|GPIO_Pin_13;    
-	GPIO_Init(GPIOE, &GPIO_InitStructure);						 
+	GPIO_Init(GPIOE, &GPIO_InitStructure);
 	
 	
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;

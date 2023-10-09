@@ -70,26 +70,25 @@ void USART2_IRQHandler()
 
 void OpenMV_Data_Process(void)
 {
-//	//openMV mode:
-//	if (OMV_data[2] == 0)
-//		flag_openmv_mode = 0;
-//	else if (0x01&OMV_data[2])
-//		flag_openmv_mode = 1;
-//	else if (0x02&OMV_data[2])
-//		flag_openmv_mode = 2;
-//	else if (0x04&OMV_data[2])
-//		flag_openmv_mode = 3;
-//	else if (0x08&OMV_data[2])
-//		flag_openmv_mode = 4;
-//	
-//	//Target cx, cy data:
-//	//possible bug here, MSB/LSB in advance?
-//	mv_target_cx = (OMV_data[3]|OMV_data[4]<<8) - IMAGE_SIZE_X/2;
-//	mv_target_cy = (OMV_data[5]|OMV_data[6]<<8) - IMAGE_SIZE_Y/2;
-//	
-//	//mark1
-//	mark1 = OMV_data[7];
-	mark1 = ((Infrared_Scan()&0x02)>>1) | ((Infrared_Scan()&0x08)>>2);
+	//openMV mode:
+	if (OMV_data[2] == 0)
+		flag_openmv_mode = 0;
+	else if (0x01&OMV_data[2])
+		flag_openmv_mode = 1;
+	else if (0x02&OMV_data[2])
+		flag_openmv_mode = 2;
+	else if (0x04&OMV_data[2])
+		flag_openmv_mode = 3;
+	else if (0x08&OMV_data[2])
+		flag_openmv_mode = 4;
+	
+	//Target cx, cy data:
+	//possible bug here, MSB/LSB in advance?
+	Mv_Target_cx = (OMV_data[3]|OMV_data[4]<<8) - IMAGE_SIZE_X/2;
+	Mv_Target_cy = (OMV_data[5]|OMV_data[6]<<8) - IMAGE_SIZE_Y/2;
+	
+	//mark1
+	mark1 = OMV_data[7];
 }
 
 void OpenMV_Display_Specs(void)

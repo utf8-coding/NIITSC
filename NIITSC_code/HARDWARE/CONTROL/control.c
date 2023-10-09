@@ -22,8 +22,8 @@ float speed_limit = 0.15, angular_speed_limit = 0.7; //speed lmit should be smal
 //constants & PIDs
 PID x_pid, y_pid, heading_pid, openmv_x_PID, openmv_y_PID, motorA_PID, motorB_PID, motorC_PID, motorD_PID;
 const float H = 0.188, W = 0.25, R = 0.413, PI = 3.1415926535;
-const float xy_kp = 0.75,	 	xy_ki = 0.010, 			xy_kd = 0.1, 			xy_ki_limit = 0.05,
-			heading_kp = 0.50, 	heading_ki = 0.004, 	heading_kd = 0.05, 	heading_ki_limit = 0.5,
+const float xy_kp = 0.75,	 	xy_ki = 0.010, 			xy_kd = 0.15, 			xy_ki_limit = 0.08,
+			heading_kp = 0.18, 	heading_ki = 0.008, 	heading_kd = 0.005, 	heading_ki_limit = 0.5,
 			//motor speed unit is m/s, should start from a small value
 			motor_kp = 1.8, 	motor_ki = 0.018, 		motor_kd = 0.01, 		motor_ki_limit = 0.05, 
 			mv_kp = 0.008, 		mv_ki = 0.0005, 		mv_kd = 0, 			mv_ki_limit = 0.1;
@@ -156,7 +156,7 @@ void check_stable(void)
 //Only available for coordinateMode.
 void check_arrive(void)
 {
-	if(fabs(x_pid.error) < 0.025 && fabs(y_pid.error) < 0.025 && fabs(heading_pid.error) < 2)
+	if(fabs(x_pid.error) < 0.025 && fabs(y_pid.error) < 0.025 && fabs(heading_pid.error) < 1.5)
 			flag_arrive = 1;
 		else
 			flag_arrive = 0;
@@ -267,10 +267,12 @@ void Control_Loop(void)
 		case absoluteSpeedMode:
 		case openmvMode:
 		{
-			if(absoluteSpeedMode)
+			if(control_mode == absoluteSpeedMode || control_mode == coordinateMode)
 			{
+				pid_calculate(&heading_pid, target_heading, OPS_heading+OPS_ring*360);
+				w = heading_pid.output/4; //parameter by experience
 				abs_speed_to_rel_speed();
-			} else if (openmvMode)
+			} else if (control_mode == openmvMode)
 			{
 				check_openmv_arrive();
 				openmv_to_rel_speed();
@@ -323,12 +325,16 @@ void Abs_Speed_Run(float vx, float vy, float w)
 {
 	if(control_mode != absoluteSpeedMode) 
 	{
+		
 		set_mode(absoluteSpeedMode);
 		set_abs_speed(vx, vy, w);
 	}
 
 	if(vx + vy + w != absVx + absVy + w)
 	{
+		//For uncontrolled turning supressing
+		target_heading = OPS_heading+OPS_ring*360;
+		w = heading_pid.output/4; //parameter by experience
 		set_abs_speed(vx, vy, w);
 	}
 }
@@ -337,11 +343,13 @@ void Target_Run(float x, float y, float heading)
 {
 	if(control_mode != coordinateMode)
 	{
+		flag_arrive = 0;
  		set_mode(coordinateMode);
 	}
 
 	if(target_x + target_y + target_heading != x + y + heading)
 	{
+		flag_arrive = 0;
 		set_target(x, y, heading);
 	}
 }
