@@ -24,7 +24,7 @@ void backObj_Run_Main(void);
 void obj2_Run_Main(void);
 void deposit2_Run_Main(void);
 void home_Run_Main(void);
-void stop_run(void);
+void stop_running(void);
 
 runState run_Mode = qrcodeMode;
 
@@ -88,12 +88,16 @@ int obj1_1(void)
 int obj1_2(void)
 {
 	Abs_Speed_Run(0, 0.05, 0); // Slow ahead
-	if(Infrared_Scan() & 0x08) 
+	
+	u8 temp_itr = 0;
+	while(1)
 	{
-		if(Infrared_Scan() & 0x08) 
+		if(Infrared_Scan() & 0x08) temp_itr++;
+		else break;
+		
+		if(temp_itr >= 5)
 		{
 			Stop_Run();
-			delay_ms(1000);
 			return 1;
 		}
 	}
@@ -103,9 +107,13 @@ int obj1_2(void)
 int obj1_3(void)
 {
 	Abs_Speed_Run(0.05, 0, 0); // Slow to the right
-	if(Infrared_Scan() & 0x01)
+	u8 temp_itr = 0;
+	while(1)
 	{
-		if(Infrared_Scan() & 0x01)
+		if(Infrared_Scan() & 0x01) temp_itr++;
+		else break;
+		
+		if(temp_itr >= 5)
 		{
 			Stop_Run();
 			return 1;
@@ -145,7 +153,7 @@ int obj2_3(void)
 	if (flag_arrive && flag_stable) //return 1;
 	{
 		OPS_Calibrate(0, 0, 0);
-		stop_run();
+		stop_running();
 	}
 	return 0;
 }
@@ -170,7 +178,7 @@ void Run(void){
 	}
 }
 
-void stop_run(void)
+void stop_running(void)
 {
 	flag_start = 0;
 	itr = 0;
