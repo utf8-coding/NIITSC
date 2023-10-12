@@ -37,7 +37,8 @@ int main(void)
 	SERVO_USART_Config();
 	OPENMV_USART_Config();
 
-	servoDefault(500);
+//	servoDefault(500);
+	servoMove(defaut, 500);
 	delay_ms(1000);
 	
 	while (1)

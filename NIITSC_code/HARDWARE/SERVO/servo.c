@@ -121,54 +121,57 @@ void USART3_IRQHandler(void)
 	}
 }
 
-/*=============================default============================*/
+///*=============================default============================*/
 
-void servoDefault(u16 nms){
-	runActionGroup(defaut, 1);  //张开 向内
+//void servoDefault(u16 nms){
+//	runActionGroup(defaut, 1);  //张开 向内
+//	delay_ms(nms);
+//}
+
+///*=============================calib============================*/
+
+//// action can be calibObj or calibRough
+//void servoMvCalib(servoAction action, u16 nms){
+//	runActionGroup(action, 1); 
+//	delay_ms(nms);
+//}
+
+///*=============================obj============================*/
+//void get_Obj(u16 nms){
+//	runActionGroup(getObj, 1);		
+//	delay_ms(nms);
+//}
+
+///*===============================rough=============================*/
+
+//void put_Rough(u16 nms){
+//	runActionGroup(putRough, 1);	
+//	delay_ms(nms);
+//}
+
+//void get_Rough(u16 nms){
+//	runActionGroup(getRough, 1);
+//	delay_ms(nms);
+//}
+
+///*===============================deposit=============================*/
+
+////暂存区下层
+//void put_Down_Dep(u16 nms){
+//	runActionGroup(putDownDep, 1);	
+//	delay_ms(nms);
+//}
+
+////暂存区上层
+//void put_Up_Dep(u16 nms){
+//	runActionGroup(putUpDep, 1);	
+//	delay_ms(nms);
+//}
+
+void servoMove(servoAction actionNum, u16 nms){
+	runActionGroup(actionNum, 1);
 	delay_ms(nms);
 }
-
-/*=============================calib============================*/
-
-// action can be calibObj or calibRough
-void servoMvCalib(servoAction action, u16 nms){
-	runActionGroup(action, 1); 
-	delay_ms(nms);
-}
-
-/*=============================obj============================*/
-void get_Obj(u16 nms){
-	runActionGroup(getObj, 1);		
-	delay_ms(nms);
-}
-
-/*===============================rough=============================*/
-
-void put_Rough(u16 nms){
-	runActionGroup(putRough, 1);	
-	delay_ms(nms);
-}
-
-void get_Rough(u16 nms){
-	runActionGroup(getRough, 1);
-	delay_ms(nms);
-}
-
-/*===============================deposit=============================*/
-
-//暂存区下层
-void put_Down_Dep(u16 nms){
-	runActionGroup(putDownDep, 1);	
-	delay_ms(nms);
-}
-
-//暂存区上层
-void put_Up_Dep(u16 nms){
-	runActionGroup(putUpDep, 1);	
-	delay_ms(nms);
-}
-
-
 
 
 
