@@ -96,7 +96,7 @@ float pid_calculate(PID* pid, float input, float measure)
 	if((pid->last_error > 0 && pid->error < 0) || (pid->last_error < 0 && pid->error > 0))
 	{
 		// remove overshoot - works pretty good!
-		pid->sum_error = -pid->sum_error;
+		pid->sum_error = 0;
 	}
 	
 	pid->last_error = pid->error;

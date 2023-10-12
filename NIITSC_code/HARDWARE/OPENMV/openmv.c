@@ -5,6 +5,7 @@
 #include "delay.h"
 #include "buzzer.h"
 #include "infrared.h"
+#include "qrcode.h"
 
 //public:
 int Mv_Target_cx = 0, Mv_Target_cy = 0;
@@ -77,7 +78,9 @@ void OpenMV_Data_Process(void)
 void OpenMV_Display_Specs(void)
 {
 	OLED_ShowString(1, 2, "OpenMV:");
-
+	OLED_ShowNum(2, 1, qr_buff[0]-red+1, 1);
+	OLED_ShowNum(2, 3, qr_buff[1]-red+1, 1);
+	OLED_ShowNum(2, 5, qr_buff[2]-red+1, 1);
 	OLED_ShowNum(3, 3, Mv_Color, 8);
 }
 

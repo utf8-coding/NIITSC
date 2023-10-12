@@ -30,6 +30,11 @@ u8 get_Itr(void);
 
 runState run_Mode = qrcodeMode;
 
+//--------------- TIME CONST --------------//
+u16 mv_calib_time = 5000;
+u16 get_put_time = 10000;
+u16 to_idle_time = 5000;
+
 //--------------- TEST --------------//
 int test1(void)
 {
@@ -81,7 +86,7 @@ int qr1_2(void)
 //------------ Get Object ------------//
 int obj1_1(void)
 {
-	Target_Run(-0.20, 1.15, 0);
+	Target_Run(-0.20, 1.25, 0);
 	speed_limit = 0.08;
 	if (flag_vague_arrive) return 1;
 	return 0;
@@ -115,21 +120,78 @@ int obj1_3(void)
 		if(Infrared_Scan() & 0x08) temp_itr++;
 		else break;
 		
-		if(temp_itr >= 8)
+		if(temp_itr >= 5)
 		{
 			Stop_Run();
+			servoMove(calibObj, mv_calib_time);
 			return 1;
 		}
 	}
 	return 0;
 }
 
+u8 temp_itr = 0;
 int obj1_4(void)
 {
-	servoMove(calibObj, 1500);
+	if(Mv_Color == qr_buff[0]-red+1){
+		temp_itr++;
+	} else
+	{
+		temp_itr = 0;
+	}
 	
-	return 1;
+	if(temp_itr > 3)
+	{
+		temp_itr = 0;
+		servoMove((servoAction)(getObjRed+qr_buff[0]-red), 4000);
+		servoMove(calibObj, 1000);
+		return 1;
+	}
+	
+	return 0;
 }
+
+int obj1_5(void)
+{
+	if(Mv_Color == qr_buff[1]-red+1){
+		temp_itr++;
+	} else
+	{
+		temp_itr = 0;
+	}
+	
+	if(temp_itr > 3)
+	{
+		temp_itr = 0;
+		servoMove((servoAction)(getObjRed+qr_buff[1]-red), 4000);
+		servoMove(calibObj, 1000);
+		return 1;
+	}
+	
+	return 0;
+}
+
+int obj1_6(void)
+{
+	if(Mv_Color == qr_buff[2]-red+1){
+		temp_itr++;
+	} else
+	{
+		temp_itr = 0;
+	}
+	
+	if(temp_itr > 3)
+	{
+		temp_itr = 0;
+		servoMove((servoAction)(getObjRed+qr_buff[2]-red), 4000);
+		servoMove(defaut,  1000);
+		return 1;
+	}
+	
+	return 0;
+}
+
+
 
 //----------- Put Obj in temp area 1-----------//
 int obj2_1(void)
@@ -142,9 +204,9 @@ int obj2_1(void)
 
 int obj2_2(void)
 {
-	Target_Run(-0.70, 1.87, -90);
+	Target_Run(-0.80, 1.87, -90);
 	speed_limit = 0.08;
-	if (flag_arrive && flag_stable) return 1;
+	if (flag_arrive) return 1;
 	return 0;
 }
 
@@ -175,10 +237,10 @@ int obj2_4(void)
 	u8 temp_itr = 0;
 	while(1)
 	{
-		if(Infrared_Scan() & 0x02) temp_itr++;
+		if(~Infrared_Scan() & 0x02) temp_itr++;
 		else break;
 		
-		if(temp_itr >= 12)
+		if(temp_itr >= 8)
 		{
 			Stop_Run();
 			return 1;
@@ -189,6 +251,15 @@ int obj2_4(void)
 //put obj
 int obj2_5(void)
 {
+	servoMove((servoAction)(putRoughRed+qr_buff[0]-red), get_put_time);
+	servoMove((servoAction)(putRoughRed+qr_buff[1]-red), get_put_time);
+	servoMove((servoAction)(putRoughRed+qr_buff[2]-red), get_put_time);
+	
+	servoMove((servoAction)(getRoughRed+qr_buff[0]-red), get_put_time);
+	servoMove((servoAction)(getRoughRed+qr_buff[1]-red), get_put_time);
+	servoMove((servoAction)(getRoughRed+qr_buff[2]-red), get_put_time);
+	
+	servoMove(idle, to_idle_time);
 	return 1;
 }
 
@@ -222,8 +293,6 @@ int obj3_3(void)
 		if(temp_itr >= 8)
 		{
 			Stop_Run();
-			OLED_Clear();
-			OLED_ShowNum(1, 1, (u32)get_Itr, 1);
 			return 1;
 		}
 	}
@@ -252,6 +321,11 @@ int obj3_4(void)
 //put obj
 int obj3_5(void)
 {
+	servoMove((servoAction)(putRoughRed+qr_buff[0]-red), get_put_time);
+	servoMove((servoAction)(putRoughRed+qr_buff[1]-red), get_put_time);
+	servoMove((servoAction)(putRoughRed+qr_buff[2]-red), get_put_time); 
+	
+	servoMove(idle, to_idle_time);
 	return 1;
 }
 
@@ -274,21 +348,13 @@ int return1_2(void)
 
 int return1_3(void)
 {
-	Target_Run(-0.15, 1.80, 0);
-	speed_limit = 0.08;
-	if (flag_vague_arrive) return 1;
-	return 0;
-}
-
-int return1_4(void)
-{
 	Target_Run(-0.20, 1.15, 0);
 	speed_limit = 0.08;
 	if (flag_vague_arrive) return 1;
 	return 0;
 }
 
-int return1_5(void)
+int return1_4(void)
 {
 	Abs_Speed_Run(0.08, 0, 0); // Slow to the right
 	u8 temp_itr = 0;
@@ -306,7 +372,7 @@ int return1_5(void)
 	return 0;
 }
 
-int return1_6(void)
+int return1_5(void)
 {
 	Abs_Speed_Run(0, 0.05, 0); // Slow ahead
 	
@@ -325,29 +391,186 @@ int return1_6(void)
 	return 0;
 }
 
-int return1_7(void)
+int return1_6(void)
 {
-	delay_ms(2000);
-	//Grab thingy
+	servoMove(calibObj, mv_calib_time);
+	while(Mv_Color != qr_buff[4]-red+1);
+	servoMove((servoAction)(getObjRed+qr_buff[4]-red), get_put_time);
+	
+	servoMove(calibObj, mv_calib_time);
+	while(Mv_Color != qr_buff[5]);
+	servoMove((servoAction)(getObjRed+qr_buff[5]-red), get_put_time);
+	
+	servoMove(calibObj, mv_calib_time);
+	while(Mv_Color != qr_buff[6]);
+	servoMove((servoAction)(getObjRed+qr_buff[6]-red), get_put_time);
+	
+	servoMove(idle, to_idle_time);
+	
 	return 1;
 }
 
-//EEENNNDDD
+//----------- Put rough 2 -----------//
+int obj4_1(void)
+{
+	Target_Run(-0.15, 1.80, -90);
+	speed_limit = 0.08;
+	if (flag_vague_arrive) return 1;
+	return 0;
+}
 
+int obj4_2(void)
+{
+	Target_Run(-0.70, 1.87, -90);
+	speed_limit = 0.08;
+	if (flag_arrive && flag_stable) return 1;
+	return 0;
+}
+
+int obj4_3(void)
+{
+	Abs_Speed_Run(0, 0.05, 0); // Slow to its right
+	
+	u8 temp_itr = 0;
+	while(1)
+	{
+		if(Infrared_Scan() & 0x01) temp_itr++;
+		else break;
+		
+		if(temp_itr >= 8)
+		{
+			Stop_Run();
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
+int obj4_4(void)
+{
+	Abs_Speed_Run(-0.045, 0, 0); // Slow to its ahead
+	
+	u8 temp_itr = 0;
+	while(1)
+	{
+		if(Infrared_Scan() & 0x02) temp_itr++;
+		else break;
+		
+		if(temp_itr >= 12)
+		{
+			Stop_Run();
+			return 1;
+		}
+	}
+	return 0;
+}
+//put obj
+int obj4_5(void)
+{
+	servoMove((servoAction)(putRoughRed+qr_buff[4]-red), get_put_time);
+	servoMove((servoAction)(putRoughRed+qr_buff[5]-red), get_put_time);
+	servoMove((servoAction)(putRoughRed+qr_buff[6]-red), get_put_time);
+	
+	servoMove((servoAction)(getRoughRed+qr_buff[4]-red), get_put_time);
+	servoMove((servoAction)(getRoughRed+qr_buff[5]-red), get_put_time);
+	servoMove((servoAction)(getRoughRed+qr_buff[6]-red), get_put_time);
+	
+	servoMove(idle, to_idle_time);
+	return 1;
+}
+
+//----------- Put Obj in final area 2-----------//
+int obj5_1(void)
+{
+	Target_Run(-1.70, 1.87, -180);
+	speed_limit = 0.08;
+	if (flag_vague_arrive) return 1;
+	return 0;
+}
+
+int obj5_2(void)
+{
+	Target_Run(-1.70, 1.50, -180);
+	speed_limit = 0.08;
+	if (flag_arrive) return 1;
+	return 0;
+}
+
+int obj5_3(void)
+{
+	Abs_Speed_Run(-0.05, 0, 0); // Slow to its right
+	
+	u8 temp_itr = 0;
+	while(1)
+	{
+		if(Infrared_Scan() & 0x01) temp_itr++;
+		else break;
+		
+		if(temp_itr >= 8)
+		{
+			Stop_Run();
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int obj5_4(void)
+{
+	Abs_Speed_Run(0, -0.045, 0); // Slow to its ahead
+	
+	u8 temp_itr = 0;
+	while(1)
+	{
+		if(Infrared_Scan() & 0x03) temp_itr++;
+		else break;
+		
+		if(temp_itr >= 12)
+		{
+			Stop_Run();
+			return 1;
+		}
+	}
+	return 0;
+}
+
+//put obj
+int obj5_5(void)
+{
+	servoMove((servoAction)(putDepHighRed+qr_buff[0]-red), get_put_time);
+	servoMove((servoAction)(putDepHighRed+qr_buff[1]-red), get_put_time);
+	servoMove((servoAction)(putDepHighRed+qr_buff[2]-red), get_put_time); 
+	
+	servoMove(idle, to_idle_time);
+	return 1;
+}
+
+
+//EEENNNDDD
+int return2_1(void)
+{
+	Target_Run(-1.70, 0.2, -180);
+	speed_limit = 0.08;
+	if (flag_arrive) return 1;
+	return 0;
+}
+	
 int end_return_home(void)
 {
-	Target_Run(0, 0, 0);
+	Target_Run(0, 0, -180);
 	speed_limit = 0.08;
 	if (flag_arrive && flag_stable) return 1;
 	return 0;
 }
 
 //----------- Run Excutor -----------//
- int(*operation_sequence[])(void) = {qr1_1, qr1_2, obj1_1, obj1_2, 
-																		obj1_3, obj1_4, obj2_1, obj2_2, obj2_3, obj2_4, obj2_5,
+ int(*operation_sequence[])(void) = {qr1_1, qr1_2, 
+																		obj1_1, obj1_2, obj1_3, obj1_4, obj1_5, obj1_6,
+																		obj2_1, obj2_2, obj2_3, obj2_4, obj2_5,
 																		obj3_1, obj3_2, obj3_3, obj3_4, obj3_5,
 																		end_return_home};
- u8 max_run_itr = 16;
+ u8 max_run_itr = 18;
 
 //int(*operation_sequence[])(void) = {test1, test2, test3};
 //u8 max_run_itr = 3;

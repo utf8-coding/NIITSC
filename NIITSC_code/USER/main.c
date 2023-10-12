@@ -37,12 +37,9 @@ int main(void)
 	SERVO_USART_Config();
 	OPENMV_USART_Config();
 
-	servoMove(defaut, 1500);
-	servoMove(calibObj, 3000);
-	servoMove(getObj1, 3000);
 //	servoMove(calibObj, 5000);
 //	servoMove(getObj2, 5000);
-//	servoMove(calibObj, 5000);
+	servoMove(defaut, 5000);
 //	servoMove(getObj3, 5000);
 	delay_ms(1000);
 	

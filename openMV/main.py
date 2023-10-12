@@ -20,7 +20,7 @@ default_exposure_us = 7000
 #Color detection thresholds/rois:
 color_detect_roi = (85, 88, 103, 103)
 red_target_th = (10, 100, 15, 61, -22, 127)
-green_target_th = (30, 100, -51, -7, -3, 30)
+green_target_th = (21, 100, -67, -15, -3, 34)
 blue_target_th = (8, 80, -86, 22, -87, -9)
 far_area_th = 3500
 area_th = far_area_th
@@ -77,6 +77,25 @@ if __name__ == '__main__':
                 if (colors[i].cx() - int(IMG_W/2))**2+(colors[i].cy() - int(IMG_H/2))**2 < dist:
                     dist = (colors[i].cx() - IMG_W/2)**2+(colors[i].cy() - IMG_H/2)**2
                     color = i+1
+        if color == 1:
+            red_led.on()
+            blue_led.off()
+            green_led.off()
+            img.draw_circle(5, 5, 5, color = RED)
+        elif color == 2:
+            red_led.off()
+            blue_led.off()
+            green_led.on()
+            img.draw_circle(5, 5, 5, color = GREEN)
+        elif color == 3:
+            red_led.off()
+            blue_led.on()
+            green_led.off()
+            img.draw_circle(5, 5, 5, color = BLUE)
+        else:
+            red_led.on()
+            blue_led.on()
+            green_led.on()
         mark0 = mark0|(color << 4)
         mark0 = mark0|0x08
 
