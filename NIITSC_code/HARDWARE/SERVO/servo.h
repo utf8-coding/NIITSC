@@ -47,12 +47,12 @@ void SERVO_USART_Config(void);
 void uartWriteBuf(uint8_t *buf, uint8_t len);
 //void servo_Action(servoAction actionNum, u16 Times);
 
-void servoDefault(u16 nms);
-void servoMvCalib(servoAction action, u16 nms);
-void get_Obj(u16 nms);
-void put_Rough(u16 nms);
-void get_Rough(u16 nms);
-void put_Up_Dep(u16 nms);
-void put_Down_Dep(u16 nms);
-
+//void servoDefault(u16 nms);
+//void servoMvCalib(servoAction action, u16 nms);
+//void get_Obj(u16 nms);
+//void put_Rough(u16 nms);
+//void get_Rough(u16 nms);
+//void put_Up_Dep(u16 nms);
+//void put_Down_Dep(u16 nms);
+void servoMove(servoAction actionNum, u16 nms);
 #endif 
