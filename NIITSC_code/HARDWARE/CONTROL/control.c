@@ -91,6 +91,14 @@ float pid_calculate(PID* pid, float input, float measure)
 		else
 			pid->output = -pid->lim_output;
   }
+	
+	//filtering
+	if((pid->last_error > 0 && pid->error < 0) || (pid->last_error < 0 && pid->error > 0))
+	{
+		// remove overshoot - works pretty good!
+		pid->sum_error = -pid->sum_error;
+	}
+	
 	pid->last_error = pid->error;
 	return 0;
 }
@@ -104,9 +112,9 @@ void set_target_motor_speed(float speedA, float speedB, float speedC, float spee
 		motorD_target_speed = speedD;
 }
 
-void set_abs_speed(float vx, float vy, float _w)
+void set_abs_speed(float vx, float vy)
 {
-	absVx = vx; absVy = vy; w = _w;
+	absVx = vx; absVy = vy; w = 0;
 }
 
 void set_rel_speed(float vx, float vy, float _w)
@@ -129,7 +137,7 @@ void set_mode(ControlMode mode)
 void clear_state_stop() //Remove the accumulated effects of previous errors in PIDs
 {
 	set_target(OPS_x, OPS_y, OPS_heading);
-	set_abs_speed(0, 0, 0);
+	set_abs_speed(0, 0);
 	set_rel_speed(0, 0, 0);
 	Set_Pwm_All(0, 0, 0, 0);
 
@@ -156,10 +164,15 @@ void check_stable(void)
 //Only available for coordinateMode.
 void check_arrive(void)
 {
-	if(fabs(x_pid.error) < 0.025 && fabs(y_pid.error) < 0.025 && fabs(heading_pid.error) < 1.5)
+	if(fabs(x_pid.error) < 0.02 && fabs(y_pid.error) < 0.02 && fabs(heading_pid.error) < 1.5)
 			flag_arrive = 1;
 		else
 			flag_arrive = 0;
+		
+	if(fabs(x_pid.error) < 0.05 && fabs(y_pid.error) < 0.05 && fabs(heading_pid.error) < 2.5)
+			flag_vague_arrive = 1;
+		else
+			flag_vague_arrive = 0;
 }
 
 //Only available for openmvMode
@@ -325,9 +338,8 @@ void Abs_Speed_Run(float vx, float vy, float w)
 {
 	if(control_mode != absoluteSpeedMode) 
 	{
-		
 		set_mode(absoluteSpeedMode);
-		set_abs_speed(vx, vy, w);
+		set_abs_speed(vx, vy);
 	}
 
 	if(vx + vy + w != absVx + absVy + w)
@@ -335,7 +347,7 @@ void Abs_Speed_Run(float vx, float vy, float w)
 		//For uncontrolled turning supressing
 		target_heading = OPS_heading+OPS_ring*360;
 		w = heading_pid.output/4; //parameter by experience
-		set_abs_speed(vx, vy, w);
+		set_abs_speed(vx, vy);
 	}
 }
 
@@ -343,12 +355,14 @@ void Target_Run(float x, float y, float heading)
 {
 	if(control_mode != coordinateMode)
 	{
+		flag_vague_arrive = 0;
 		flag_arrive = 0;
  		set_mode(coordinateMode);
 	}
 
 	if(target_x + target_y + target_heading != x + y + heading)
 	{
+		flag_vague_arrive = 0;
 		flag_arrive = 0;
 		set_target(x, y, heading);
 	}

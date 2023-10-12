@@ -11,6 +11,7 @@
 #include "motor.h"
 #include "encoder.h"
 #include "led.h"
+#include "oled.h"
 
 
 u8 color_Index = 0; // 车上的数量  
@@ -25,6 +26,7 @@ void obj2_Run_Main(void);
 void deposit2_Run_Main(void);
 void home_Run_Main(void);
 void stop_running(void);
+u8 get_Itr(void);
 
 runState run_Mode = qrcodeMode;
 
@@ -67,7 +69,7 @@ int qr1_2(void)
 	else if (QR_Ready() == scanning && OPS_y > 1.8f)
 	{
 		Stop_Run();
-		stop_run(); //走太远了，直接锁死，等手动重置
+		stop_running(); //走太远了，直接锁死，等手动重置
 	}
 	else if (QR_Ready() == qrRight)
 	{
@@ -81,21 +83,20 @@ int obj1_1(void)
 {
 	Target_Run(-0.20, 1.15, 0);
 	speed_limit = 0.08;
-	if (flag_arrive) return 1;
+	if (flag_vague_arrive) return 1;
 	return 0;
 }
 
 int obj1_2(void)
 {
-	Abs_Speed_Run(0, 0.05, 0); // Slow ahead
-	
+	Abs_Speed_Run(0.08, 0, 0); // Slow to the right
 	u8 temp_itr = 0;
 	while(1)
 	{
-		if(Infrared_Scan() & 0x08) temp_itr++;
+		if(Infrared_Scan() & 0x01) temp_itr++;
 		else break;
 		
-		if(temp_itr >= 5)
+		if(temp_itr >= 8)
 		{
 			Stop_Run();
 			return 1;
@@ -106,14 +107,15 @@ int obj1_2(void)
 
 int obj1_3(void)
 {
-	Abs_Speed_Run(0.05, 0, 0); // Slow to the right
+	Abs_Speed_Run(0, 0.05, 0); // Slow ahead
+	
 	u8 temp_itr = 0;
 	while(1)
 	{
-		if(Infrared_Scan() & 0x01) temp_itr++;
+		if(Infrared_Scan() & 0x08) temp_itr++;
 		else break;
 		
-		if(temp_itr >= 5)
+		if(temp_itr >= 8)
 		{
 			Stop_Run();
 			return 1;
@@ -124,23 +126,23 @@ int obj1_3(void)
 
 int obj1_4(void)
 {
-	delay_ms(5000);
+	delay_ms(2000);
 	//Grab thingy
 	return 1;
 }
 
-//----------- Put Obj1 in temp area -----------//
+//----------- Put Obj in temp area 1-----------//
 int obj2_1(void)
 {
-	Target_Run(-0.15, 1.80, -45);
+	Target_Run(-0.15, 1.80, -90);
 	speed_limit = 0.08;
-	if (flag_arrive) return 1;
+	if (flag_vague_arrive) return 1;
 	return 0;
 }
 
 int obj2_2(void)
 {
-	Target_Run(-0.90, 1.87, -90);
+	Target_Run(-0.70, 1.87, -90);
 	speed_limit = 0.08;
 	if (flag_arrive && flag_stable) return 1;
 	return 0;
@@ -148,20 +150,76 @@ int obj2_2(void)
 
 int obj2_3(void)
 {
-	Target_Run(0, 0, 0);
-	speed_limit = 0.08;
-	if (flag_arrive && flag_stable) //return 1;
+	Abs_Speed_Run(0, 0.05, 0); // Slow ahead
+	
+	u8 temp_itr = 0;
+	while(1)
 	{
-		OPS_Calibrate(0, 0, 0);
-		stop_running();
+		if(Infrared_Scan() & 0x01) temp_itr++;
+		else break;
+		
+		if(temp_itr >= 8)
+		{
+			Stop_Run();
+			OLED_Clear();
+			OLED_ShowNum(1, 1, (u32)get_Itr, 1);
+			delay_ms(5000);
+			return 1;
+		}
 	}
 	return 0;
 }
 
+//----------- Put Obj in final area 1-----------//
+int obj3_1(void)
+{
+	Target_Run(-1.70, 1.87, -180);
+	speed_limit = 0.08;
+	if (flag_vague_arrive) return 1;
+	return 0;
+}
+
+int obj3_2(void)
+{
+	Target_Run(-1.70, 0.80, -180);
+	speed_limit = 0.08;
+	if (flag_arrive) return 1;
+	return 0;
+}
+
+int obj3_3(void)
+{
+	Abs_Speed_Run(-0.08, 0, 0); // Slow left
+	
+	u8 temp_itr = 0;
+	while(1)
+	{
+		if(Infrared_Scan() & 0x01) temp_itr++;
+		else break;
+		
+		if(temp_itr >= 8)
+		{
+			Stop_Run();
+			OLED_Clear();
+			OLED_ShowNum(1, 1, (u32)get_Itr, 1);
+			delay_ms(5000);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int obj3_4(void)
+{
+	Target_Run(0, 0, 0);
+	speed_limit = 0.08;
+	if (flag_arrive && flag_stable) return 1;
+	return 0;
+}
 
 //----------- Run Excutor -----------//
- int(*operation_sequence[])(void) = {qr1_1, qr1_2, obj1_1, obj1_2, obj1_3, obj1_4, obj2_1, obj2_2, obj2_3};
- u8 max_run_itr = 9;
+ int(*operation_sequence[])(void) = {qr1_1, qr1_2, obj1_1, obj1_2, obj1_3, obj1_4, obj2_1, obj2_2, obj2_3, obj3_1, obj3_2, obj3_3, obj3_4};
+ u8 max_run_itr = 13;
 
 //int(*operation_sequence[])(void) = {test1, test2, test3};
 //u8 max_run_itr = 3;
@@ -172,7 +230,6 @@ void Run(void){
 	if(operation_sequence[itr]()) itr++;
 	if (itr >= max_run_itr) 
 	{
-		LED_Flip();
 		itr = 0;
 		flag_start = 0;
 	}
@@ -182,6 +239,11 @@ void stop_running(void)
 {
 	flag_start = 0;
 	itr = 0;
+}
+
+u8 get_Itr(void)
+{
+	return itr;
 }
 
 /*-----------------------------obj--------------------------*/

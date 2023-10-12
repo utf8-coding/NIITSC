@@ -80,7 +80,8 @@ void OPS_Calibrate(float x, float y, float heading)
 	Serial_SendArray(OPS_UART, &new_value.data[0], 4);
 	
 	delay_ms(30);
-	new_value.value = y*1000;
+	OPS_ring = (int)y/360;
+	new_value.value = (int)y%360*1000;
 	Serial_SendArray(OPS_UART, update_y, 4);
 	Serial_SendArray(OPS_UART, &new_value.data[0], 4);
 	
@@ -195,16 +196,13 @@ void OPS_Data_Process(void){
 		} else {
 			//转圈处理
 			static u8 ring_lock = 0;
-			if (OPS_heading > 170 && -OPS_data.ActVal[1] < -170 && !ring_lock){
+			if (OPS_heading > 170 && -OPS_data.ActVal[1] < -170){
 				OPS_ring += 1;
 				ring_lock = 1;
 			}
-			else if (OPS_heading < -170 && -OPS_data.ActVal[1] > 170 && !ring_lock){
+			else if (OPS_heading < -170 && -OPS_data.ActVal[1] > 170){
 				OPS_ring -= 1;
 				ring_lock = 1;
-			}
-			else if (OPS_heading >= -170 && OPS_heading <= 170){
-				ring_lock = 0;
 			}
 			//位置数据
 			OPS_heading = -OPS_data.ActVal[1];//degree
