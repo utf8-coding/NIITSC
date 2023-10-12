@@ -195,14 +195,11 @@ void OPS_Data_Process(void){
 			USART_ITConfig(USART1, USART_IT_RXNE,ENABLE);
 		} else {
 			//转圈处理
-			static u8 ring_lock = 0;
 			if (OPS_heading > 170 && -OPS_data.ActVal[1] < -170){
 				OPS_ring += 1;
-				ring_lock = 1;
 			}
 			else if (OPS_heading < -170 && -OPS_data.ActVal[1] > 170){
 				OPS_ring -= 1;
-				ring_lock = 1;
 			}
 			//位置数据
 			OPS_heading = -OPS_data.ActVal[1];//degree

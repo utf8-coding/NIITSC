@@ -8,7 +8,7 @@
 
 //public:
 int Mv_Target_cx = 0, Mv_Target_cy = 0;
-u8 mark1 = 0;
+u8 Mv_Color = 0;
 
 //internal:
 int IMAGE_SIZE_X = 320, IMAGE_SIZE_Y = 240;
@@ -45,8 +45,8 @@ void OPENMV_USART_Config(void)
   USART_InitStructure.USART_Parity = USART_Parity_No;
   USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
   
-  USART_Init(OPENMV_USART,&USART_InitStructure); //��ʼ������1
-  USART_Cmd(OPENMV_USART,ENABLE); //ʹ�ܴ���1
+  USART_Init(OPENMV_USART,&USART_InitStructure);
+  USART_Cmd(OPENMV_USART,ENABLE);
   
   USART_ITConfig(OPENMV_USART, USART_IT_RXNE, ENABLE);
 
@@ -57,67 +57,27 @@ void OPENMV_USART_Config(void)
   NVIC_Init(&NVIC_InitStructure);
 }
 
-u8 OMV_Rx_Buffer[15] = {0x00};
-u8 OMV_data[15] = {0x00};
+u8 OMV_Rx_Buffer[7] = {0x00};
+u8 OMV_data[5] = {0x00};
 void USART2_IRQHandler()
 {
 	if(USART_GetITStatus(OPENMV_USART, USART_IT_RXNE) == SET)
 	{
 		//USART_TypeDef* UARTx, u8 *buffer, u8 buffer_size, u8 data_size, u8 *out_buffer, u16 header, u16 tail
-		Serial_Receive_Data_LH(OPENMV_USART, &OMV_Rx_Buffer[0], 15, 10, &OMV_data[0], 0x5A5A, 0xA6A6);
+		Serial_Receive_Data_LH(OPENMV_USART, &OMV_Rx_Buffer[0], 7, 5, &OMV_data[0], 0x5A5A, 0xA6A6);
 	}
 }
 
 void OpenMV_Data_Process(void)
 {
 	//openMV mode:
-	if (OMV_data[2] == 0)
-		flag_openmv_mode = 0;
-	else if (0x01&OMV_data[2])
-		flag_openmv_mode = 1;
-	else if (0x02&OMV_data[2])
-		flag_openmv_mode = 2;
-	else if (0x04&OMV_data[2])
-		flag_openmv_mode = 3;
-	else if (0x08&OMV_data[2])
-		flag_openmv_mode = 4;
-	
-	//Target cx, cy data:
-	//possible bug here, MSB/LSB in advance?
-	Mv_Target_cx = (OMV_data[3]|OMV_data[4]<<8) - IMAGE_SIZE_X/2;
-	Mv_Target_cy = (OMV_data[5]|OMV_data[6]<<8) - IMAGE_SIZE_Y/2;
-	
-	//mark1
-	mark1 = OMV_data[7];
+	Mv_Color = OMV_data[2] >> 4; // r-1 g-2 b-3
 }
 
 void OpenMV_Display_Specs(void)
 {
 	OLED_ShowString(1, 2, "OpenMV:");
 
-	OLED_ShowBinNum(3, 3, mark1, 8);
+	OLED_ShowNum(3, 3, Mv_Color, 8);
 }
-
-//Idle:0, Red:1, G:2, B:3, recog:4
-int OpenMV_Change_Mode(u8 mode)
-{
-	OLED_Clear();
-	OLED_ShowString(1, 1, "OpenMV_Change_Mode."); 
-	Serial_SendByte(OPENMV_USART, mode);
-	
-	for(int retry_counter = 0;retry_counter >= SET_RETRY_LIMIT; retry_counter++)
-	{
-		if (flag_openmv_mode == mode)
-			return 1;
-		else if (retry_counter >= SET_RETRY_LIMIT)
-			//Should be a warning here. Buzzer or something.
-			return 0;
-		
-		delay_ms(100);
-		Serial_SendByte(OPENMV_USART, mode);
-		retry_counter++;
-	}
-	return 0;
-}
-
 
