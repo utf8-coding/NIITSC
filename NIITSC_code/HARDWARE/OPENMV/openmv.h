@@ -25,7 +25,7 @@
 #define OPENMV_TAIL										0x66ff
 
 extern int Mv_Target_cx, Mv_Target_cy;
-extern u8 mark1;
+extern u8 Mv_Color;
 void OPENMV_USART_Config(void);
 void OpenMV_Display_Specs(void);
 int OpenMV_Change_Mode(u8 mode);

@@ -30,14 +30,25 @@
 
 /************************************************************/
 typedef enum{
-	defaut,      
-	calibObj,
-	calibRough,
-	getObj,
-	getRough,
-	putRough,
-	putDownDep,
-	putUpDep
+	defaut,				// 2s
+	calibObj,			// 3s
+	
+	getObjRed,
+	getObjGreen,
+	getObjBlue,
+	
+	putRoughRed,
+	putRoughGreen,
+	putRoughBlue,
+	getRoughRed,
+	getRoughGreen,
+	getRoughBlue,
+	
+	putDepHighRed,
+	putDepHighGreen,
+	putDepHighBlue,
+	
+	idle
 }servoAction;
 
 extern u8 USART_RX_BUF[64];     //½ÓÊÕ»º³å,×î´ó63¸ö×Ö½Ú.Ä©×Ö½ÚÎª»»ÐÐ·û 
